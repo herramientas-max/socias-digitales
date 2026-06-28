@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     if (!trimmed || !trimmed.includes('@')) continue
 
     const { error } = await admin.auth.admin.inviteUserByEmail(trimmed, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://socias-digitales.vercel.app'}/perfil`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://socias-digitales.vercel.app'}/auth/callback`,
     })
 
     if (error) {
