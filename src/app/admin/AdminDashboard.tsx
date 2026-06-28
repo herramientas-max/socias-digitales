@@ -63,6 +63,8 @@ export default function AdminDashboard({ alumnas, stats }: Props) {
   const [alumnaSeleccionada, setAlumnaSeleccionada] = useState<Alumna | null>(null)
   const [editando, setEditando] = useState<Partial<Alumna>>({})
   const [guardando, setGuardando] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false)
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
@@ -88,6 +90,20 @@ export default function AdminDashboard({ alumnas, stats }: Props) {
     setGuardando(true)
     await supabase.from('perfiles').update(editando).eq('id', alumnaSeleccionada.id)
     setGuardando(false)
+    setAlumnaSeleccionada(null)
+    router.refresh()
+  }
+
+  async function eliminarAlumna() {
+    if (!alumnaSeleccionada) return
+    setEliminando(true)
+    await fetch('/api/eliminar-alumna', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: alumnaSeleccionada.id }),
+    })
+    setEliminando(false)
+    setConfirmarEliminar(false)
     setAlumnaSeleccionada(null)
     router.refresh()
   }
@@ -362,20 +378,40 @@ export default function AdminDashboard({ alumnas, stats }: Props) {
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-100 flex gap-3">
-              <button
-                onClick={() => setAlumnaSeleccionada(null)}
-                className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={guardarFicha}
-                disabled={guardando}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white py-2.5 rounded-lg text-sm font-medium"
-              >
-                {guardando ? 'Guardando...' : 'Guardar cambios'}
-              </button>
+            <div className="p-6 border-t border-gray-100 space-y-3">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setAlumnaSeleccionada(null)}
+                  className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={guardarFicha}
+                  disabled={guardando}
+                  className="flex-1 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white py-2.5 rounded-lg text-sm font-medium"
+                >
+                  {guardando ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </div>
+              {!confirmarEliminar ? (
+                <button
+                  onClick={() => setConfirmarEliminar(true)}
+                  className="w-full border border-red-200 text-red-500 hover:bg-red-50 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🗑️ Eliminar alumna
+                </button>
+              ) : (
+                <div className="bg-red-50 rounded-lg p-3 space-y-2">
+                  <p className="text-sm text-red-700 font-medium text-center">¿Segura? Esta acción no se puede deshacer.</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setConfirmarEliminar(false)} className="flex-1 border border-gray-200 text-gray-600 py-2 rounded-lg text-sm">Cancelar</button>
+                    <button onClick={eliminarAlumna} disabled={eliminando} className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-bold">
+                      {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
