@@ -16,12 +16,8 @@ function CrearContrasenaForm() {
   const supabase = createClient()
 
   useEffect(() => {
-    const token_hash = searchParams.get('token_hash')
-    const type = searchParams.get('type')
-    if (token_hash && type) {
-      supabase.auth.verifyOtp({ token_hash, type: type as 'invite' })
-    }
-  }, [searchParams])
+    // La sesión ya fue establecida por /auth/callback
+  }, [])
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault()
