@@ -3,15 +3,15 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
-        // Si viene de una invitación, mandar a crear contraseña
         const hash = window.location.hash
         if (hash.includes('type=invite')) {
           router.push('/crear-contrasena')
@@ -21,8 +21,8 @@ export default function AuthCallbackPage() {
       }
     })
 
-    // También chequear si ya hay sesión activa
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
+      const session = data.session
       if (session) {
         const hash = window.location.hash
         if (hash.includes('type=invite')) {
@@ -32,6 +32,8 @@ export default function AuthCallbackPage() {
         }
       }
     })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   return (
