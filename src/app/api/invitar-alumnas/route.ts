@@ -29,7 +29,8 @@ export async function POST(request: Request) {
     })
 
     if (error) {
-      resultados.push({ email: trimmed, ok: false, mensaje: error.message })
+      console.error('Error invitando', trimmed, error)
+      resultados.push({ email: trimmed, ok: false, mensaje: error.message || error.code || JSON.stringify(error) || 'Error desconocido' })
     } else {
       resultados.push({ email: trimmed, ok: true, mensaje: 'Invitación enviada' })
     }
