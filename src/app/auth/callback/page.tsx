@@ -44,7 +44,22 @@ export default function AuthCallbackPage() {
         return
       }
 
-      // Formato 3: access_token en el hash (se procesa automático al crear el cliente)
+      // Formato 3: access_token y refresh_token en el hash (flujo implícito)
+      if (hash.includes('access_token')) {
+        const params = new URLSearchParams(hash.replace('#', ''))
+        const access_token = params.get('access_token')
+        const refresh_token = params.get('refresh_token')
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+          if (error) {
+            setError('El link expiró o ya fue usado. Pedile a tu administradora que te reenvíe la invitación.')
+            return
+          }
+          irSegunTipo(params.get('type') === 'invite' || hash.includes('type=invite'))
+          return
+        }
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         irSegunTipo(hash.includes('type=invite'))
