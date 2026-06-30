@@ -25,7 +25,7 @@ function CrearContrasenaForm() {
     if (contrasena.length < 6) return setError('La contraseña debe tener al menos 6 caracteres.')
     if (contrasena !== confirmar) return setError('Las contraseñas no coinciden.')
     setGuardando(true)
-    const { error } = await supabase.auth.updateUser({ password: contrasena })
+    const { error } = await supabase.auth.updateUser({ password: contrasena, data: { password_set: true } })
     if (error) {
       setError('Error al guardar. Intentá de nuevo.')
     } else {

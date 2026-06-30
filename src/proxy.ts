@@ -38,6 +38,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/perfil', request.url))
   }
 
+  // Si fue invitada y nunca creó su contraseña, forzarla antes de cualquier otra cosa
+  const debeCrearContrasena = user?.user_metadata?.password_set === false
+  const rutasExentas = ['/crear-contrasena', '/auth/callback', '/login']
+  if (user && debeCrearContrasena && !rutasExentas.some(r => pathname.startsWith(r))) {
+    return NextResponse.redirect(new URL('/crear-contrasena', request.url))
+  }
+
   // Rutas aún no habilitadas — redirigir a perfil con aviso
   const rutasProximamente = ['/classroom', '/productos', '/ranking', '/logros', '/comunidad', '/resultados']
   if (user && rutasProximamente.some(r => pathname.startsWith(r))) {

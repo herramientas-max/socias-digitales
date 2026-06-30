@@ -26,6 +26,7 @@ export async function POST(request: Request) {
 
     const { error } = await admin.auth.admin.inviteUserByEmail(trimmed, {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://socias-digitales.vercel.app'}/auth/callback`,
+      data: { password_set: false },
     })
 
     if (error) {
