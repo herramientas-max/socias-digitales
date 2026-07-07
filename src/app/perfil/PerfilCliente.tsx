@@ -129,6 +129,7 @@ export default function PerfilCliente({ user, perfil }: Props) {
         <img src="/logo.png" alt="Socias Digitales" style={{ height: 36, objectFit: 'contain' }} />
         <div className="flex items-center gap-4">
           <a href="/metricas" className="text-sm text-rose-600 hover:text-rose-800 font-medium hidden sm:block">Métricas</a>
+          <a href="/productos" className="text-sm text-rose-600 hover:text-rose-800 font-medium hidden sm:block">Productos</a>
           {esAdmin && <a href="/admin" className="text-sm text-rose-600 hover:text-rose-800 font-medium">Panel Admin</a>}
           <button onClick={cerrarSesion} className="text-sm text-gray-500 hover:text-gray-800">Cerrar sesión</button>
         </div>
@@ -193,10 +194,17 @@ export default function PerfilCliente({ user, perfil }: Props) {
             </div>
           </a>
 
-          {/* Próximamente x4 */}
+          {/* Productos — activo */}
+          <a href="/productos"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
+            <div className="text-5xl mb-3">🛍️</div>
+            <p className="font-bold text-gray-800 text-base">Productos</p>
+            <p className="text-xs text-gray-400 mt-1">Tu catálogo de afiliada</p>
+          </a>
+
+          {/* Próximamente x3 */}
           {[
             { emoji: '📚', label: 'Classroom' },
-            { emoji: '🛍️', label: 'Productos' },
             { emoji: '💬', label: 'Comunidad' },
             { emoji: '🏆', label: 'Mis logros' },
           ].map(item => (

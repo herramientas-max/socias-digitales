@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Rutas aún no habilitadas — redirigir a perfil con aviso
-  const rutasProximamente = ['/classroom', '/productos', '/ranking', '/logros', '/comunidad', '/resultados']
+  const rutasProximamente = ['/classroom', '/ranking', '/logros', '/comunidad', '/resultados']
   if (user && rutasProximamente.some(r => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/perfil?proximamente=1', request.url))
   }
