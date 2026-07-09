@@ -10,6 +10,7 @@ interface Producto {
   descripcion: string | null
   tipo: string
   subtipo: string | null
+  marca: string | null
   precio: number
   moneda: string
   comision_pct: number
@@ -29,6 +30,7 @@ const PRODUCTO_VACIO = {
   descripcion: '',
   tipo: 'digital',
   subtipo: 'ebook',
+  marca: '',
   precio: 0,
   moneda: 'USD',
   comision_pct: 20,
@@ -39,10 +41,28 @@ const PRODUCTO_VACIO = {
 }
 
 const TIPO_EMOJI: Record<string, string> = { fisico: '📦', digital: '💻' }
+
+const SUBTIPOS_FISICO = [
+  'Cartera',
+  'Billetera',
+  'Ropa interior',
+  'Ropa exterior',
+  'Calzado',
+  'Accesorios',
+  'Bijouterie',
+  'Cosmética',
+  'Perfumería',
+  'Hogar y deco',
+  'Otro físico',
+]
+
+const SUBTIPOS_DIGITAL = ['Ebook', 'Membresía', 'Curso', 'Otro digital']
+
 const SUBTIPO_LABEL: Record<string, string> = {
   ebook: 'Ebook',
   membresia: 'Membresía',
-  otro: 'Otro',
+  curso: 'Curso',
+  otro: 'Otro digital',
   producto_fisico: 'Producto físico',
 }
 
@@ -171,7 +191,8 @@ export default function ProductosAdmin({ productos, cotizacion }: Props) {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 mb-1">{p.nombre}</h3>
+                  <h3 className="font-bold text-gray-900 mb-0.5">{p.nombre}</h3>
+                  {p.marca && <p className="text-xs text-rose-500 font-medium mb-1">{p.marca}</p>}
                   {p.descripcion && <p className="text-xs text-gray-500 line-clamp-2 mb-3">{p.descripcion}</p>}
 
                   <div className="flex items-center justify-between mb-3">
@@ -192,7 +213,7 @@ export default function ProductosAdmin({ productos, cotizacion }: Props) {
                       {p.activo ? 'Desactivar' : 'Activar'}
                     </button>
                     <button onClick={() => {
-                      setEditando({ nombre: p.nombre, descripcion: p.descripcion ?? '', tipo: p.tipo, subtipo: p.subtipo ?? 'otro', precio: p.precio, moneda: p.moneda, comision_pct: p.comision_pct, imagen_url: p.imagen_url ?? '', link_compra: p.link_compra ?? '', activo: p.activo, orden: p.orden, id: p.id })
+                      setEditando({ nombre: p.nombre, descripcion: p.descripcion ?? '', tipo: p.tipo, subtipo: p.subtipo ?? '', marca: p.marca ?? '', precio: p.precio, moneda: p.moneda, comision_pct: p.comision_pct, imagen_url: p.imagen_url ?? '', link_compra: p.link_compra ?? '', activo: p.activo, orden: p.orden, id: p.id })
                       setModal(true)
                     }} className="flex-1 text-xs py-1.5 rounded-lg font-medium border border-gray-200 text-gray-500 hover:bg-gray-50">
                       Editar
@@ -250,28 +271,30 @@ export default function ProductosAdmin({ productos, cotizacion }: Props) {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Categoría</label>
                   <select value={editando.tipo}
-                    onChange={e => setEditando(p => ({ ...p, tipo: e.target.value, subtipo: e.target.value === 'fisico' ? 'producto_fisico' : 'ebook' }))}
+                    onChange={e => setEditando(p => ({ ...p, tipo: e.target.value, subtipo: e.target.value === 'fisico' ? 'Cartera' : 'Ebook' }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
                     <option value="digital">💻 Digital</option>
                     <option value="fisico">📦 Físico</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Tipo de producto</label>
                   <select value={editando.subtipo ?? ''}
                     onChange={e => setEditando(p => ({ ...p, subtipo: e.target.value }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-                    {editando.tipo === 'digital' ? (
-                      <>
-                        <option value="ebook">Ebook</option>
-                        <option value="membresia">Membresía</option>
-                        <option value="otro">Otro digital</option>
-                      </>
-                    ) : (
-                      <option value="producto_fisico">Producto físico</option>
-                    )}
+                    {(editando.tipo === 'fisico' ? SUBTIPOS_FISICO : SUBTIPOS_DIGITAL).map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Marca</label>
+                <input type="text" placeholder="Ej: Desigual, Victoria's Secret, Nike..."
+                  value={editando.marca ?? ''}
+                  onChange={e => setEditando(p => ({ ...p, marca: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
               </div>
 
               <div className="grid grid-cols-3 gap-3">

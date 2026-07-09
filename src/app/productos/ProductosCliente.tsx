@@ -10,6 +10,7 @@ interface Producto {
   descripcion: string | null
   tipo: string
   subtipo: string | null
+  marca: string | null
   precio: number
   moneda: string
   comision_pct: number
@@ -131,6 +132,7 @@ export default function ProductosCliente({ productos, misLinks, userId, cotizaci
                 <div className="p-4 space-y-3">
                   <div>
                     <h3 className="font-bold text-gray-900">{p.nombre}</h3>
+                    {p.marca && <p className="text-xs text-rose-500 font-medium mt-0.5">{p.marca}</p>}
                     {p.descripcion && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{p.descripcion}</p>}
                   </div>
 
