@@ -48,6 +48,23 @@ const ESTADO_LABEL: Record<string, string> = {
 const anioActual = new Date().getFullYear()
 const ANIOS = [anioActual - 1, anioActual, anioActual + 1]
 
+const RANGOS = [
+  { id: 1, nombre: 'Primera venta', emoji: '🌱', descripcion: 'Lograste tu primera comisión', minMonto: 0, minVentas: 1, color: '#E27396', bg: '#fce7f3' },
+  { id: 2, nombre: 'Rising Star', emoji: '⭐', descripcion: 'Acumulaste USD $100 en comisiones', minMonto: 100, minVentas: 0, color: '#d97706', bg: '#fef3c7' },
+  { id: 3, nombre: 'Top Seller', emoji: '🔥', descripcion: 'Acumulaste USD $500 en comisiones', minMonto: 500, minVentas: 0, color: '#7c3aed', bg: '#ede9fe' },
+  { id: 4, nombre: 'Socia Élite', emoji: '👑', descripcion: 'Acumulaste USD $1.000 en comisiones', minMonto: 1000, minVentas: 0, color: '#337357', bg: '#edf7f2' },
+]
+
+function calcularRango(total: number, cantidadVentas: number) {
+  let rangoActual = null
+  for (const r of RANGOS) {
+    const cumpleMonto = r.minMonto === 0 || total >= r.minMonto
+    const cumpleVentas = r.minVentas === 0 || cantidadVentas >= r.minVentas
+    if (cumpleMonto && cumpleVentas) rangoActual = r
+  }
+  return rangoActual
+}
+
 export default function ResultadosCliente({ misResultados, productos, userId }: Props) {
   const router = useRouter()
   const supabase = createClient()
@@ -132,6 +149,66 @@ export default function ResultadosCliente({ misResultados, productos, userId }: 
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Total acumulado + rangos */}
+        {(() => {
+          const aprobados = misResultados.filter(r => r.estado === 'aprobado')
+          const total = aprobados.reduce((acc, r) => acc + (r.monto ?? 0), 0)
+          const cantVentas = aprobados.filter(r => r.monto && r.monto > 0).length
+          const rangoActual = calcularRango(total, cantVentas)
+          const proximoRango = RANGOS.find(r => r.id === (rangoActual ? rangoActual.id + 1 : 1))
+
+          return (
+            <div className="bg-white rounded-3xl shadow-sm p-6 space-y-5">
+              {/* Total */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Total acumulado</p>
+                  <p className="text-4xl font-black mt-1" style={{ color: '#337357' }}>
+                    ${total.toLocaleString('es-AR')} <span className="text-lg font-bold text-gray-400">USD</span>
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">{cantVentas} venta{cantVentas !== 1 ? 's' : ''} aprobada{cantVentas !== 1 ? 's' : ''}</p>
+                </div>
+                {rangoActual && (
+                  <div className="text-center px-4 py-3 rounded-2xl" style={{ background: rangoActual.bg }}>
+                    <p className="text-3xl">{rangoActual.emoji}</p>
+                    <p className="text-xs font-bold mt-1" style={{ color: rangoActual.color }}>{rangoActual.nombre}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Barra de progreso al próximo rango */}
+              {proximoRango && proximoRango.minMonto > 0 && (
+                <div>
+                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Progreso hacia {proximoRango.emoji} {proximoRango.nombre}</span>
+                    <span>${total.toLocaleString('es-AR')} / ${proximoRango.minMonto.toLocaleString('es-AR')}</span>
+                  </div>
+                  <div className="w-full rounded-full h-2.5" style={{ background: '#f3f4f6' }}>
+                    <div className="h-2.5 rounded-full transition-all"
+                      style={{ width: `${Math.min((total / proximoRango.minMonto) * 100, 100)}%`, background: '#E27396' }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Hitos */}
+              <div className="grid grid-cols-4 gap-2">
+                {RANGOS.map(r => {
+                  const cumpleMonto = r.minMonto === 0 ? cantVentas >= r.minVentas : total >= r.minMonto
+                  const esCurrent = rangoActual?.id === r.id
+                  return (
+                    <div key={r.id} className={`rounded-2xl p-3 text-center transition-all ${cumpleMonto ? '' : 'opacity-40'}`}
+                      style={{ background: cumpleMonto ? r.bg : '#f9fafb', border: esCurrent ? `2px solid ${r.color}` : '2px solid transparent' }}>
+                      <p className="text-2xl">{cumpleMonto ? r.emoji : '🔒'}</p>
+                      <p className="text-xs font-bold mt-1 leading-tight" style={{ color: cumpleMonto ? r.color : '#9ca3af' }}>{r.nombre}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 leading-tight">{r.descripcion}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
 
         <div className="flex justify-end">
           {!mostrarForm && (
