@@ -121,13 +121,19 @@ export default function ResultadosCliente({ misResultados, productos, userId }: 
         </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
+      {/* Portada */}
+      <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
+        <img src="/banner-resultados.png" alt="Mis resultados" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 flex flex-col justify-end px-8 pb-6"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)' }}>
+          <h1 className="text-3xl font-black text-white">Mis resultados</h1>
+          <p className="text-sm text-white/80 mt-1">Compartí tus logros y comisiones ganadas</p>
+        </div>
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-black" style={{ color: '#1a1a1a' }}>Mis resultados</h1>
-            <p className="text-sm text-gray-500 mt-1">Compartí tus logros y comisiones ganadas</p>
-          </div>
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+
+        <div className="flex justify-end">
           {!mostrarForm && (
             <button onClick={() => setMostrarForm(true)}
               className="text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
