@@ -50,9 +50,9 @@ const ANIOS = [anioActual - 1, anioActual, anioActual + 1]
 
 const RANGOS = [
   { id: 1, nombre: 'Primera venta', emoji: '🌱', descripcion: 'Lograste tu primera comisión', minMonto: 0, minVentas: 1, color: '#E27396', bg: '#fce7f3' },
-  { id: 2, nombre: 'Rising Star', emoji: '⭐', descripcion: 'Acumulaste USD $100 en comisiones', minMonto: 100, minVentas: 0, color: '#d97706', bg: '#fef3c7' },
-  { id: 3, nombre: 'Top Seller', emoji: '🔥', descripcion: 'Acumulaste USD $500 en comisiones', minMonto: 500, minVentas: 0, color: '#7c3aed', bg: '#ede9fe' },
-  { id: 4, nombre: 'Socia Élite', emoji: '👑', descripcion: 'Acumulaste USD $1.000 en comisiones', minMonto: 1000, minVentas: 0, color: '#337357', bg: '#edf7f2' },
+  { id: 2, nombre: 'Rising Star', emoji: '⭐', descripcion: 'USD $100 en comisiones', minMonto: 100, minVentas: 0, color: '#d97706', bg: '#fef3c7' },
+  { id: 3, nombre: 'Top Seller', emoji: '🔥', descripcion: 'USD $500 en comisiones', minMonto: 500, minVentas: 0, color: '#7c3aed', bg: '#ede9fe' },
+  { id: 4, nombre: 'Socia Élite', emoji: '👑', descripcion: 'USD $1.000 en comisiones', minMonto: 1000, minVentas: 0, color: '#337357', bg: '#edf7f2' },
 ]
 
 function calcularRango(total: number, cantidadVentas: number) {
