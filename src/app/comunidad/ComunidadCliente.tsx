@@ -169,11 +169,12 @@ export default function ComunidadCliente({ resultados, reacciones, comentarios, 
                     </p>
                   </div>
                   {r.monto && (
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400">Comisión</p>
-                      <p className="font-black text-base" style={{ color: '#337357' }}>
-                        +${r.monto.toLocaleString('es-AR')} USD
+                    <div className="text-right px-3 py-2 rounded-2xl" style={{ background: '#edf7f2' }}>
+                      <p className="text-xs font-medium" style={{ color: '#337357' }}>Comisión ganada</p>
+                      <p className="font-black text-2xl leading-tight" style={{ color: '#337357' }}>
+                        +${r.monto.toLocaleString('es-AR')}
                       </p>
+                      <p className="text-xs font-bold" style={{ color: '#337357' }}>USD</p>
                     </div>
                   )}
                 </div>
