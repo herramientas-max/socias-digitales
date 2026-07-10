@@ -11,6 +11,8 @@ interface Resultado {
   descripcion: string | null
   archivo_url: string | null
   monto: number | null
+  mes: string | null
+  producto_id: string | null
   pais: string | null
   estrategia: string | null
   estado: string
@@ -189,8 +191,14 @@ export default function ResultadosAdmin({ resultados }: Props) {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {resultadoAbierto.monto && (
                   <div className="bg-rose-50 rounded-xl p-3">
-                    <p className="text-xs text-gray-400">Monto</p>
-                    <p className="font-bold text-rose-600">${resultadoAbierto.monto.toLocaleString('es-AR')}</p>
+                    <p className="text-xs text-gray-400">Comisión ganada</p>
+                    <p className="font-bold text-rose-600">${resultadoAbierto.monto.toLocaleString('es-AR')} USD</p>
+                  </div>
+                )}
+                {resultadoAbierto.mes && (
+                  <div className="bg-gray-50 rounded-xl p-3">
+                    <p className="text-xs text-gray-400">Mes</p>
+                    <p className="font-medium text-gray-800">{resultadoAbierto.mes}</p>
                   </div>
                 )}
                 {resultadoAbierto.estrategia && (

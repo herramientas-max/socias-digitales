@@ -202,11 +202,18 @@ export default function PerfilCliente({ user, perfil }: Props) {
             <p className="text-xs text-gray-400 mt-1">Tu catálogo de afiliada</p>
           </a>
 
-          {/* Próximamente x3 */}
+          {/* Resultados — activo */}
+          <a href="/resultados"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
+            <div className="text-5xl mb-3">🏆</div>
+            <p className="font-bold text-gray-800 text-base">Mis resultados</p>
+            <p className="text-xs text-gray-400 mt-1">Cargá tus comisiones</p>
+          </a>
+
+          {/* Próximamente x2 */}
           {[
             { emoji: '📚', label: 'Classroom' },
             { emoji: '💬', label: 'Comunidad' },
-            { emoji: '🏆', label: 'Mis logros' },
           ].map(item => (
             <div key={item.label} className="bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center opacity-50 cursor-not-allowed">
               <div className="text-5xl mb-3 inline-block grayscale">{item.emoji}</div>
