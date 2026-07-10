@@ -122,12 +122,12 @@ export default function ResultadosCliente({ misResultados, productos, userId }: 
       </nav>
 
       {/* Portada */}
-      <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/9', maxHeight: '56vw' }}>
         <img src="/banner-resultados.png" alt="Mis resultados" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 flex flex-col justify-end px-8 pb-6"
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)' }}>
-          <h1 className="text-3xl font-black text-white">Mis resultados</h1>
-          <p className="text-sm text-white/80 mt-1">Compartí tus logros y comisiones ganadas</p>
+        <div className="absolute inset-0 flex flex-col justify-end px-8 pb-8"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%)' }}>
+          <h1 className="text-4xl font-black text-white">Mis resultados</h1>
+          <p className="text-base text-white/80 mt-1">Compartí tus logros y comisiones ganadas</p>
         </div>
       </div>
 
