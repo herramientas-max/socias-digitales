@@ -163,47 +163,54 @@ export default function ComunidadCliente({ resultados, reacciones, comentarios, 
             return (
               <div key={r.id} className="bg-white rounded-3xl shadow-sm overflow-hidden">
 
-                {/* Cabecera */}
-                <div className="px-5 pt-5 pb-3 flex items-center gap-3">
-                  <Avatar url={r.perfiles?.avatar_url} nombre={r.perfiles?.nombre} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 text-sm">{r.perfiles?.nombre ?? 'Socia'}</p>
-                    <p className="text-xs text-gray-400">
-                      {r.mes && <span>{r.mes} · </span>}
-                      {new Date(r.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}
-                    </p>
-                  </div>
-                  {r.monto && (
-                    <div className="text-right px-3 py-2 rounded-2xl" style={{ background: '#edf7f2' }}>
-                      <p className="text-xs font-medium" style={{ color: '#337357' }}>Comisión ganada</p>
-                      <p className="font-black text-2xl leading-tight" style={{ color: '#337357' }}>
-                        +${r.monto.toLocaleString('es-AR')}
-                      </p>
-                      <p className="text-xs font-bold" style={{ color: '#337357' }}>USD</p>
+                {/* Card horizontal */}
+                <div className="flex gap-0">
+                  {/* Foto izquierda */}
+                  {r.archivo_url && (
+                    <div className="flex-shrink-0" style={{ width: 160 }}>
+                      <img src={r.archivo_url} className="h-full w-full object-cover" style={{ minHeight: 160, maxHeight: 220 }} alt="" />
                     </div>
                   )}
+
+                  {/* Contenido derecha */}
+                  <div className="flex-1 flex flex-col justify-between p-4 min-w-0">
+                    {/* Nombre y fecha */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Avatar url={r.perfiles?.avatar_url} nombre={r.perfiles?.nombre} />
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-900 text-sm truncate">{r.perfiles?.nombre ?? 'Socia'}</p>
+                          <p className="text-xs text-gray-400">
+                            {r.mes ?? new Date(r.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                      {r.monto && (
+                        <div className="text-right px-3 py-2 rounded-2xl flex-shrink-0" style={{ background: '#edf7f2' }}>
+                          <p className="text-xs font-medium" style={{ color: '#337357' }}>Comisión</p>
+                          <p className="font-black text-xl leading-tight" style={{ color: '#337357' }}>
+                            +${r.monto.toLocaleString('es-AR')}
+                          </p>
+                          <p className="text-xs font-bold" style={{ color: '#337357' }}>USD</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Descripción */}
+                    {r.descripcion && (
+                      <p className="text-sm text-gray-700 leading-relaxed mt-3 line-clamp-3">{r.descripcion}</p>
+                    )}
+
+                    {/* Producto */}
+                    {r.productos && (
+                      <div className="mt-2">
+                        <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
+                          🛍️ {r.productos.nombre}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                {/* Foto */}
-                {r.archivo_url && (
-                  <img src={r.archivo_url} className="w-full object-cover" style={{ maxHeight: 360 }} alt="" />
-                )}
-
-                {/* Descripción */}
-                {r.descripcion && (
-                  <div className="px-5 py-3">
-                    <p className="text-sm text-gray-800 leading-relaxed">{r.descripcion}</p>
-                  </div>
-                )}
-
-                {/* Producto */}
-                {r.productos && (
-                  <div className="px-5 pb-2">
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
-                      🛍️ {r.productos.nombre}
-                    </span>
-                  </div>
-                )}
 
                 {/* Acciones */}
                 <div className="px-5 py-3 border-t border-gray-100 flex items-center gap-4">
