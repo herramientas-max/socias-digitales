@@ -130,12 +130,17 @@ export default function ComunidadCliente({ resultados, reacciones, comentarios, 
         </div>
       </nav>
 
-      <div className="max-w-xl mx-auto px-4 py-10 space-y-4">
-
-        <div className="mb-6">
-          <h1 className="text-2xl font-black" style={{ color: '#1a1a1a' }}>Muro de resultados</h1>
-          <p className="text-sm text-gray-500 mt-1">Los logros de toda la comunidad Socias Digitales 🏆</p>
+      {/* Portada */}
+      <div className="relative w-full">
+        <img src="/banner-comunidad.png" alt="Muro de resultados" className="w-full" style={{ display: 'block' }} />
+        <div className="absolute inset-0 flex flex-col justify-end px-8 pb-8"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%)' }}>
+          <h1 className="text-4xl font-black text-white">Muro de resultados</h1>
+          <p className="text-base text-white/80 mt-1">Los logros de toda la comunidad Socias Digitales 🏆</p>
         </div>
+      </div>
+
+      <div className="max-w-xl mx-auto px-4 py-10 space-y-4">
 
         {resultados.length === 0 ? (
           <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
