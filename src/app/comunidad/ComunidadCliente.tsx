@@ -131,8 +131,8 @@ export default function ComunidadCliente({ resultados, reacciones, comentarios, 
       </nav>
 
       {/* Portada */}
-      <div className="relative w-full">
-        <img src="/banner-comunidad.png" alt="Muro de resultados" className="w-full" style={{ display: 'block' }} />
+      <div className="relative w-full overflow-hidden" style={{ height: 315 }}>
+        <img src="/banner-comunidad.png" alt="Muro de resultados" className="w-full h-full object-cover" style={{ display: 'block' }} />
         <div className="absolute inset-0 flex flex-col justify-end px-8 pb-8"
           style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%)' }}>
           <h1 className="text-4xl font-black text-white">Muro de resultados</h1>
