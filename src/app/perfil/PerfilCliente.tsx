@@ -210,17 +210,20 @@ export default function PerfilCliente({ user, perfil }: Props) {
             <p className="text-xs text-gray-400 mt-1">Cargá tus comisiones</p>
           </a>
 
-          {/* Próximamente x2 */}
-          {[
-            { emoji: '📚', label: 'Classroom' },
-            { emoji: '💬', label: 'Comunidad' },
-          ].map(item => (
-            <div key={item.label} className="bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center opacity-50 cursor-not-allowed">
-              <div className="text-5xl mb-3 inline-block grayscale">{item.emoji}</div>
-              <p className="font-bold text-gray-400 text-base">{item.label}</p>
-              <p className="text-xs text-gray-400 mt-1">🔒 Próximamente</p>
-            </div>
-          ))}
+          {/* Comunidad — activa */}
+          <a href="/comunidad"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
+            <div className="text-5xl mb-3">💬</div>
+            <p className="font-bold text-gray-800 text-base">Comunidad</p>
+            <p className="text-xs text-gray-400 mt-1">Muro de resultados</p>
+          </a>
+
+          {/* Próximamente x1 */}
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center opacity-50 cursor-not-allowed">
+            <div className="text-5xl mb-3 inline-block grayscale">📚</div>
+            <p className="font-bold text-gray-400 text-base">Classroom</p>
+            <p className="text-xs text-gray-400 mt-1">🔒 Próximamente</p>
+          </div>
         </div>
 
         {/* Formulario de perfil (colapsable) */}
