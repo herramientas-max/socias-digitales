@@ -49,10 +49,13 @@ const anioActual = new Date().getFullYear()
 const ANIOS = [anioActual - 1, anioActual, anioActual + 1]
 
 const RANGOS = [
-  { id: 1, nombre: 'Primera venta', emoji: '🌱', descripcion: 'Lograste tu primera comisión', minMonto: 0, minVentas: 1, color: '#E27396', bg: '#fce7f3' },
-  { id: 2, nombre: '100 USD', emoji: '⭐', descripcion: 'USD $100 en comisiones', minMonto: 100, minVentas: 0, color: '#d97706', bg: '#fef3c7' },
-  { id: 3, nombre: '500 USD', emoji: '🔥', descripcion: 'USD $500 en comisiones', minMonto: 500, minVentas: 0, color: '#7c3aed', bg: '#ede9fe' },
-  { id: 4, nombre: '1000 USD', emoji: '👑', descripcion: 'USD $1.000 en comisiones', minMonto: 1000, minVentas: 0, color: '#337357', bg: '#edf7f2' },
+  { id: 1, nombre: 'Primera venta', emoji: '🌱', descripcion: 'Primera comisión', minMonto: 0, minVentas: 1, color: '#E27396', bg: '#fce7f3' },
+  { id: 2, nombre: '100 USD', emoji: '⭐', descripcion: 'USD $100', minMonto: 100, minVentas: 0, color: '#d97706', bg: '#fef3c7' },
+  { id: 3, nombre: '500 USD', emoji: '🔥', descripcion: 'USD $500', minMonto: 500, minVentas: 0, color: '#7c3aed', bg: '#ede9fe' },
+  { id: 4, nombre: '1.000 USD', emoji: '💎', descripcion: 'USD $1.000', minMonto: 1000, minVentas: 0, color: '#0ea5e9', bg: '#e0f2fe' },
+  { id: 5, nombre: 'Socia Select', emoji: '🥉', descripcion: 'USD $5.000', minMonto: 5000, minVentas: 0, color: '#92400e', bg: '#fef3c7' },
+  { id: 6, nombre: 'Socia Pro', emoji: '🥈', descripcion: 'USD $10.000', minMonto: 10000, minVentas: 0, color: '#475569', bg: '#f1f5f9' },
+  { id: 7, nombre: 'Socia Elite', emoji: '🥇', descripcion: 'USD $20.000', minMonto: 20000, minVentas: 0, color: '#b45309', bg: '#fffbeb' },
 ]
 
 function calcularRango(total: number, cantidadVentas: number) {
@@ -192,7 +195,7 @@ export default function ResultadosCliente({ misResultados, productos, userId }: 
               )}
 
               {/* Hitos */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
                 {RANGOS.map(r => {
                   const cumpleMonto = r.minMonto === 0 ? cantVentas >= r.minVentas : total >= r.minMonto
                   const esCurrent = rangoActual?.id === r.id
