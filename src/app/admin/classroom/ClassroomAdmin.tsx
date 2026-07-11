@@ -4,100 +4,75 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-interface Leccion {
-  id: string
-  titulo: string
-  orden: number
-  duracion_min: number
-}
-
-interface Modulo {
+interface Clase {
   id: string
   titulo: string
   descripcion: string | null
-  imagen_url: string | null
+  vimeo_url: string | null
   orden: number
-  estado: string
-  lecciones: Leccion[]
+  plan: '27' | '97'
+  modulo: string
+  activo: boolean
+}
+
+interface Alumna {
+  id: string
+  nombre: string
+  plan: string | null
 }
 
 interface Props {
-  modulos: Modulo[]
+  clases: Clase[]
+  alumnas: Alumna[]
 }
 
-const MODULO_VACIO = { titulo: '', descripcion: '', imagen_url: '', orden: 0, estado: 'borrador' }
-const LECCION_VACIA = { titulo: '', descripcion: '', video_url: '', contenido: '', duracion_min: 0, orden: 0 }
+const CLASE_VACIA = {
+  titulo: '',
+  descripcion: '',
+  vimeo_url: '',
+  plan: '27' as '27' | '97',
+  modulo: 'Módulo 1',
+  activo: true,
+  orden: 0,
+}
 
-export default function ClassroomAdmin({ modulos: modulosIniciales }: Props) {
+export default function ClassroomAdmin({ clases, alumnas }: Props) {
   const router = useRouter()
   const supabase = createClient()
 
-  const [modulos, setModulos] = useState(modulosIniciales)
-  const [modalModulo, setModalModulo] = useState(false)
-  const [modalLeccion, setModalLeccion] = useState<string | null>(null) // moduloId
-  const [moduloEditando, setModuloEditando] = useState<typeof MODULO_VACIO & { id?: string }>(MODULO_VACIO)
-  const [leccionEditando, setLeccionEditando] = useState<typeof LECCION_VACIA & { id?: string }>(LECCION_VACIA)
+  const [tab, setTab] = useState<'clases' | 'alumnas'>('clases')
+  const [modal, setModal] = useState(false)
+  const [editando, setEditando] = useState<typeof CLASE_VACIA & { id?: string }>(CLASE_VACIA)
   const [guardando, setGuardando] = useState(false)
-  const [subiendoImg, setSubiendoImg] = useState(false)
-  const [moduloExpandido, setModuloExpandido] = useState<string | null>(null)
+  const [asignando, setAsignando] = useState<string | null>(null)
 
-  async function guardarModulo() {
+  const modulos = [...new Set(clases.map(c => c.modulo))]
+
+  async function guardarClase() {
     setGuardando(true)
-    if (moduloEditando.id) {
-      await supabase.from('modulos').update(moduloEditando).eq('id', moduloEditando.id)
+    const datos = { ...editando, orden: Number(editando.orden) }
+    if (editando.id) {
+      await supabase.from('clases').update(datos).eq('id', editando.id)
     } else {
-      await supabase.from('modulos').insert({ ...moduloEditando, orden: modulos.length })
+      await supabase.from('clases').insert({ ...datos, orden: clases.length })
     }
-    setModalModulo(false)
-    setModuloEditando(MODULO_VACIO)
+    setModal(false)
+    setEditando(CLASE_VACIA)
     setGuardando(false)
     router.refresh()
   }
 
-  async function eliminarModulo(id: string) {
-    if (!confirm('¿Eliminar este módulo y todas sus lecciones?')) return
-    await supabase.from('modulos').delete().eq('id', id)
+  async function eliminarClase(id: string) {
+    if (!confirm('¿Eliminar esta clase?')) return
+    await supabase.from('clases').delete().eq('id', id)
     router.refresh()
   }
 
-  async function toggleEstado(modulo: Modulo) {
-    const nuevoEstado = modulo.estado === 'publicado' ? 'borrador' : 'publicado'
-    await supabase.from('modulos').update({ estado: nuevoEstado }).eq('id', modulo.id)
+  async function asignarPlan(alumnaId: string, plan: string | null) {
+    setAsignando(alumnaId)
+    await supabase.from('perfiles').update({ plan }).eq('id', alumnaId)
+    setAsignando(null)
     router.refresh()
-  }
-
-  async function guardarLeccion(moduloId: string) {
-    setGuardando(true)
-    const modulo = modulos.find(m => m.id === moduloId)
-    const datos = { ...leccionEditando, modulo_id: moduloId, orden: leccionEditando.id ? leccionEditando.orden : (modulo?.lecciones.length ?? 0) }
-    if (leccionEditando.id) {
-      await supabase.from('lecciones').update(datos).eq('id', leccionEditando.id)
-    } else {
-      await supabase.from('lecciones').insert(datos)
-    }
-    setModalLeccion(null)
-    setLeccionEditando(LECCION_VACIA)
-    setGuardando(false)
-    router.refresh()
-  }
-
-  async function eliminarLeccion(id: string) {
-    if (!confirm('¿Eliminar esta lección?')) return
-    await supabase.from('lecciones').delete().eq('id', id)
-    router.refresh()
-  }
-
-  async function subirImagenModulo(e: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = e.target.files?.[0]
-    if (!archivo) return
-    setSubiendoImg(true)
-    const nombre = `modulo-${Date.now()}.${archivo.name.split('.').pop()}`
-    const { error } = await supabase.storage.from('modulos').upload(nombre, archivo, { upsert: true })
-    if (!error) {
-      const { data } = supabase.storage.from('modulos').getPublicUrl(nombre)
-      setModuloEditando(prev => ({ ...prev, imagen_url: data.publicUrl }))
-    }
-    setSubiendoImg(false)
   }
 
   return (
@@ -105,211 +80,175 @@ export default function ClassroomAdmin({ modulos: modulosIniciales }: Props) {
       <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <a href="/admin" className="text-gray-400 hover:text-gray-600 text-sm">← Admin</a>
-          <h1 className="text-lg font-bold text-rose-600">Gestión de Classroom</h1>
+          <h1 className="text-lg font-bold text-rose-600">Programa Socias Digitales</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <a href="/classroom" className="text-sm text-rose-600 hover:text-rose-800 font-medium">Ver classroom →</a>
-          <button onClick={() => { setModuloEditando(MODULO_VACIO); setModalModulo(true) }}
+        {tab === 'clases' && (
+          <button onClick={() => { setEditando({ ...CLASE_VACIA, orden: clases.length }); setModal(true) }}
             className="bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium px-4 py-2 rounded-lg">
-            + Nuevo módulo
+            + Nueva clase
           </button>
-        </div>
+        )}
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
-        {modulos.length === 0 ? (
-          <div className="bg-white rounded-xl p-10 text-center text-gray-400">
-            <p className="text-4xl mb-3">📚</p>
-            <p>No hay módulos todavía. Creá el primero.</p>
-          </div>
-        ) : modulos.map((modulo, i) => (
-          <div key={modulo.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Header módulo */}
-            <div className="flex items-center gap-4 p-5">
-              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                {modulo.imagen_url
-                  ? <img src={modulo.imagen_url} className="w-full h-full object-cover" alt="" />
-                  : <div className="w-full h-full flex items-center justify-center text-2xl font-black text-gray-300">{i + 1}</div>
-                }
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-gray-900">{modulo.titulo}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${modulo.estado === 'publicado' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {modulo.estado}
-                  </span>
-                </div>
-                {modulo.descripcion && <p className="text-sm text-gray-500 truncate mt-0.5">{modulo.descripcion}</p>}
-                <p className="text-xs text-gray-400 mt-1">{modulo.lecciones.length} lecciones</p>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => toggleEstado(modulo)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${modulo.estado === 'publicado' ? 'border-gray-200 text-gray-500 hover:bg-gray-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}>
-                  {modulo.estado === 'publicado' ? 'Despublicar' : 'Publicar'}
-                </button>
-                <button onClick={() => { setModuloEditando({ titulo: modulo.titulo, descripcion: modulo.descripcion ?? '', imagen_url: modulo.imagen_url ?? '', orden: modulo.orden, estado: modulo.estado, id: modulo.id }); setModalModulo(true) }}
-                  className="text-xs px-3 py-1.5 rounded-lg font-medium border border-gray-200 text-gray-500 hover:bg-gray-50">
-                  Editar
-                </button>
-                <button onClick={() => setModuloExpandido(moduloExpandido === modulo.id ? null : modulo.id)}
-                  className="text-xs px-3 py-1.5 rounded-lg font-medium border border-gray-200 text-gray-500 hover:bg-gray-50">
-                  {moduloExpandido === modulo.id ? '▲ Lecciones' : '▼ Lecciones'}
-                </button>
-                <button onClick={() => eliminarModulo(modulo.id)}
-                  className="text-xs px-3 py-1.5 rounded-lg font-medium border border-red-100 text-red-400 hover:bg-red-50">
-                  Eliminar
-                </button>
-              </div>
-            </div>
-
-            {/* Lecciones */}
-            {moduloExpandido === modulo.id && (
-              <div className="border-t border-gray-100 bg-gray-50 p-4 space-y-2">
-                {modulo.lecciones.length === 0
-                  ? <p className="text-sm text-gray-400 text-center py-4">No hay lecciones. Agregá la primera.</p>
-                  : modulo.lecciones.map((lec, j) => (
-                    <div key={lec.id} className="flex items-center gap-3 bg-white rounded-lg px-4 py-3">
-                      <span className="w-6 h-6 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">{j + 1}</span>
-                      <p className="text-sm font-medium text-gray-800 flex-1">{lec.titulo}</p>
-                      {lec.duracion_min > 0 && <span className="text-xs text-gray-400">{lec.duracion_min} min</span>}
-                      <button onClick={() => { setLeccionEditando({ ...lec, video_url: '', contenido: '', descripcion: '' }); setModalLeccion(modulo.id) }}
-                        className="text-xs text-rose-500 hover:text-rose-700 font-medium">Editar</button>
-                      <button onClick={() => eliminarLeccion(lec.id)}
-                        className="text-xs text-red-400 hover:text-red-600 font-medium">×</button>
-                    </div>
-                  ))
-                }
-                <button onClick={() => { setLeccionEditando({ ...LECCION_VACIA, orden: modulo.lecciones.length }); setModalLeccion(modulo.id) }}
-                  className="w-full py-2.5 border-2 border-dashed border-gray-200 hover:border-rose-300 text-sm text-gray-400 hover:text-rose-500 rounded-lg transition-colors font-medium">
-                  + Agregar lección
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex gap-6 max-w-5xl mx-auto">
+          {(['clases', 'alumnas'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`py-3 text-sm font-medium border-b-2 transition-colors ${tab === t ? 'border-rose-500 text-rose-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}>
+              {t === 'clases' ? `📚 Clases (${clases.length})` : `👥 Alumnas y planes (${alumnas.length})`}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Modal módulo */}
-      {modalModulo && (
+      <div className="max-w-5xl mx-auto px-4 py-8">
+
+        {tab === 'clases' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                <p className="text-2xl font-bold text-gray-900">{clases.length}</p>
+                <p className="text-xs text-gray-400 mt-1">Total clases</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                <p className="text-2xl font-bold" style={{ color: '#E27396' }}>{clases.filter(c => c.plan === '27').length}</p>
+                <p className="text-xs text-gray-400 mt-1">Plan $27</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 text-center shadow-sm border border-gray-100">
+                <p className="text-2xl font-bold" style={{ color: '#337357' }}>{clases.filter(c => c.plan === '97').length}</p>
+                <p className="text-xs text-gray-400 mt-1">Plan $97</p>
+              </div>
+            </div>
+
+            {modulos.length === 0 ? (
+              <div className="bg-white rounded-xl p-12 text-center text-gray-400">
+                <p className="text-4xl mb-3">📚</p>
+                <p>No hay clases todavía. Creá la primera.</p>
+              </div>
+            ) : (
+              modulos.map(modulo => (
+                <div key={modulo}>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">{modulo}</h2>
+                  <div className="space-y-2">
+                    {clases.filter(c => c.modulo === modulo).map(clase => (
+                      <div key={clase.id} className={`bg-white rounded-xl p-4 flex items-center gap-4 border ${clase.activo ? 'border-gray-100' : 'border-gray-100 opacity-60'}`}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                          style={{ background: clase.plan === '27' ? '#fce7f3' : '#edf7f2', color: clase.plan === '27' ? '#E27396' : '#337357' }}>
+                          {clase.orden + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-gray-900 text-sm">{clase.titulo}</p>
+                          {clase.descripcion && <p className="text-xs text-gray-400 truncate">{clase.descripcion}</p>}
+                          {clase.vimeo_url && <p className="text-xs text-blue-400 truncate mt-0.5">{clase.vimeo_url}</p>}
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${clase.plan === '27' ? 'bg-pink-100 text-pink-600' : 'bg-green-100 text-green-700'}`}>
+                          ${clase.plan}
+                        </span>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button onClick={() => {
+                            setEditando({ titulo: clase.titulo, descripcion: clase.descripcion ?? '', vimeo_url: clase.vimeo_url ?? '', plan: clase.plan, modulo: clase.modulo, activo: clase.activo, orden: clase.orden, id: clase.id })
+                            setModal(true)
+                          }} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">Editar</button>
+                          <button onClick={() => eliminarClase(clase.id)}
+                            className="text-xs px-2 py-1.5 rounded-lg border border-red-100 text-red-400 hover:bg-red-50">×</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {tab === 'alumnas' && (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500 mb-4">Asigná el plan de acceso a cada alumna.</p>
+            {alumnas.map(alumna => (
+              <div key={alumna.id} className="bg-white rounded-xl p-4 flex items-center gap-4 border border-gray-100">
+                <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center text-lg flex-shrink-0">🌸</div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 text-sm">{alumna.nombre ?? 'Sin nombre'}</p>
+                  <p className="text-xs text-gray-400">{alumna.plan ? `Plan $${alumna.plan} activo` : 'Sin plan asignado'}</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button onClick={() => asignarPlan(alumna.id, '27')} disabled={asignando === alumna.id}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${alumna.plan === '27' ? 'border-pink-300 bg-pink-50 text-pink-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                    $27
+                  </button>
+                  <button onClick={() => asignarPlan(alumna.id, '97')} disabled={asignando === alumna.id}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${alumna.plan === '97' ? 'border-green-300 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                    $97
+                  </button>
+                  {alumna.plan && (
+                    <button onClick={() => asignarPlan(alumna.id, null)} disabled={asignando === alumna.id}
+                      className="text-xs px-2 py-1.5 rounded-lg border border-red-100 text-red-400 hover:bg-red-50">×</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {modal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">{moduloEditando.id ? 'Editar módulo' : 'Nuevo módulo'}</h3>
-              <button onClick={() => setModalModulo(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <h3 className="font-bold text-gray-900">{editando.id ? 'Editar clase' : 'Nueva clase'}</h3>
+              <button onClick={() => setModal(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="p-6 space-y-4">
-              {/* Preview imagen */}
-              <div className="h-32 bg-gray-100 rounded-xl overflow-hidden relative flex items-center justify-center">
-                {moduloEditando.imagen_url
-                  ? <img src={moduloEditando.imagen_url} className="w-full h-full object-cover" alt="" />
-                  : <span className="text-gray-300 text-4xl font-black">📸</span>
-                }
-                <label className="absolute bottom-2 right-2 bg-white text-xs font-medium px-3 py-1.5 rounded-lg shadow cursor-pointer hover:bg-gray-50">
-                  {subiendoImg ? 'Subiendo...' : 'Subir imagen'}
-                  <input type="file" accept="image/*" onChange={subirImagenModulo} className="hidden" />
-                </label>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Título</label>
+                <input type="text" placeholder="Ej: Cómo encontrar tu primer producto"
+                  value={editando.titulo}
+                  onChange={e => setEditando(p => ({ ...p, titulo: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
               </div>
-
-              {[
-                { label: 'Título', key: 'titulo', placeholder: 'Ej: Ep1. Tu primera comisión' },
-                { label: 'Descripción', key: 'descripcion', placeholder: 'Descripción breve del módulo' },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-                  <input type="text" placeholder={placeholder}
-                    value={(moduloEditando as unknown as Record<string, string>)[key] ?? ''}
-                    onChange={e => setModuloEditando(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
-                </div>
-              ))}
-
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Descripción (opcional)</label>
+                <textarea rows={2} placeholder="De qué trata esta clase..."
+                  value={editando.descripcion ?? ''}
+                  onChange={e => setEditando(p => ({ ...p, descripcion: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Link de Vimeo</label>
+                <input type="url" placeholder="https://vimeo.com/123456789"
+                  value={editando.vimeo_url ?? ''}
+                  onChange={e => setEditando(p => ({ ...p, vimeo_url: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Orden</label>
-                  <input type="number" min={0}
-                    value={moduloEditando.orden}
-                    onChange={e => setModuloEditando(prev => ({ ...prev, orden: parseInt(e.target.value) }))}
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Módulo</label>
+                  <input type="text" placeholder="Módulo 1"
+                    value={editando.modulo}
+                    onChange={e => setEditando(p => ({ ...p, modulo: e.target.value }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Estado</label>
-                  <select value={moduloEditando.estado}
-                    onChange={e => setModuloEditando(prev => ({ ...prev, estado: e.target.value }))}
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Plan requerido</label>
+                  <select value={editando.plan}
+                    onChange={e => setEditando(p => ({ ...p, plan: e.target.value as '27' | '97' }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-                    <option value="borrador">Borrador</option>
-                    <option value="publicado">Publicado</option>
+                    <option value="27">$27 — Básico</option>
+                    <option value="97">$97 — Completo</option>
                   </select>
                 </div>
               </div>
-            </div>
-            <div className="p-6 border-t border-gray-100 flex gap-3">
-              <button onClick={() => setModalModulo(false)} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-medium">Cancelar</button>
-              <button onClick={guardarModulo} disabled={guardando || !moduloEditando.titulo}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white py-2.5 rounded-lg text-sm font-medium">
-                {guardando ? 'Guardando...' : 'Guardar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal lección */}
-      {modalLeccion && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="font-bold text-gray-900">{leccionEditando.id ? 'Editar lección' : 'Nueva lección'}</h3>
-              <button onClick={() => setModalLeccion(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-            </div>
-            <div className="p-6 space-y-4">
-              {[
-                { label: 'Título', key: 'titulo', placeholder: 'Título de la lección' },
-                { label: 'Descripción', key: 'descripcion', placeholder: 'Descripción breve' },
-                { label: 'URL del video (YouTube o Vimeo)', key: 'video_url', placeholder: 'https://youtube.com/watch?v=...' },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-                  <input type="text" placeholder={placeholder}
-                    value={(leccionEditando as unknown as Record<string, string>)[key] ?? ''}
-                    onChange={e => setLeccionEditando(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
-                </div>
-              ))}
-
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Contenido / Notas</label>
-                <textarea
-                  placeholder="Texto, recursos, enlaces..."
-                  rows={4}
-                  value={leccionEditando.contenido ?? ''}
-                  onChange={e => setLeccionEditando(prev => ({ ...prev, contenido: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Duración (minutos)</label>
-                  <input type="number" min={0}
-                    value={leccionEditando.duracion_min}
-                    onChange={e => setLeccionEditando(prev => ({ ...prev, duracion_min: parseInt(e.target.value) || 0 }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Orden</label>
-                  <input type="number" min={0}
-                    value={leccionEditando.orden}
-                    onChange={e => setLeccionEditando(prev => ({ ...prev, orden: parseInt(e.target.value) || 0 }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
-                </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="activo" checked={editando.activo}
+                  onChange={e => setEditando(p => ({ ...p, activo: e.target.checked }))} className="rounded" />
+                <label htmlFor="activo" className="text-sm text-gray-600">Clase activa (visible para alumnas)</label>
               </div>
             </div>
             <div className="p-6 border-t border-gray-100 flex gap-3">
-              <button onClick={() => setModalLeccion(null)} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-medium">Cancelar</button>
-              <button onClick={() => guardarLeccion(modalLeccion)} disabled={guardando || !leccionEditando.titulo}
+              <button onClick={() => setModal(false)} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-lg text-sm font-medium">Cancelar</button>
+              <button onClick={guardarClase} disabled={guardando || !editando.titulo}
                 className="flex-1 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white py-2.5 rounded-lg text-sm font-medium">
-                {guardando ? 'Guardando...' : 'Guardar lección'}
+                {guardando ? 'Guardando...' : 'Guardar clase'}
               </button>
             </div>
           </div>

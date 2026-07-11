@@ -1,44 +1,55 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface Leccion { id: string }
-
-interface Modulo {
+interface Clase {
   id: string
   titulo: string
   descripcion: string | null
-  imagen_url: string | null
+  vimeo_url: string | null
   orden: number
-  lecciones: Leccion[]
+  plan: '27' | '97'
+  modulo: string
+  activo: boolean
 }
 
 interface Perfil {
   nombre: string | null
   avatar_url: string | null
   rol: string
+  plan: string | null
 }
 
 interface Props {
-  modulos: Modulo[]
-  leccionesCompletadas: Set<string>
-  perfil: Perfil | null
+  clases: Clase[]
+  planAlumna: string | null
   esAdmin: boolean
+  perfil: Perfil | null
 }
 
-const COLORES_GRADIENTE = [
-  'from-violet-500 to-purple-700',
-  'from-rose-500 to-pink-700',
-  'from-amber-500 to-orange-600',
-  'from-emerald-500 to-teal-700',
-  'from-sky-500 to-blue-700',
-  'from-fuchsia-500 to-pink-700',
-]
+function vimeoEmbed(url: string) {
+  const match = url.match(/vimeo\.com\/(\d+)/)
+  return match ? `https://player.vimeo.com/video/${match[1]}?title=0&byline=0&portrait=0` : null
+}
 
-export default function ClassroomCliente({ modulos, leccionesCompletadas, perfil, esAdmin }: Props) {
+export default function ClassroomCliente({ clases, planAlumna, esAdmin, perfil }: Props) {
   const router = useRouter()
   const supabase = createClient()
+  const [claseAbierta, setClaseAbierta] = useState<Clase | null>(null)
+
+  const tieneAcceso = (plan: string) => {
+    if (esAdmin) return true
+    if (!planAlumna) return false
+    if (planAlumna === '97') return true
+    return plan === '27'
+  }
+
+  // Agrupar por módulo
+  const modulos = [...new Set(clases.map(c => c.modulo))]
+  const totalDesbloqueadas = clases.filter(c => tieneAcceso(c.plan)).length
+  const total = clases.length
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
@@ -46,123 +57,148 @@ export default function ClassroomCliente({ modulos, leccionesCompletadas, perfil
     router.refresh()
   }
 
-  function calcularProgreso(modulo: Modulo) {
-    if (!modulo.lecciones.length) return 0
-    const completadas = modulo.lecciones.filter(l => leccionesCompletadas.has(l.id)).length
-    return Math.round((completadas / modulo.lecciones.length) * 100)
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Nav estilo Skool */}
-      <nav className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
-          <div className="flex items-center gap-6">
-            <span className="font-bold text-rose-600 text-lg">Socias Digitales</span>
-            <div className="hidden sm:flex items-center gap-1 text-sm text-gray-500">
-              <a href="/comunidad" className="px-3 py-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg">Comunidad</a>
-              <a href="/classroom" className="px-3 py-1.5 text-gray-900 font-semibold border-b-2 border-rose-500">Classroom</a>
-              <a href="/ranking" className="px-3 py-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg">Ranking</a>
-              <a href="/logros" className="px-3 py-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg">Logros</a>
-              {esAdmin && <a href="/admin" className="px-3 py-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg">Admin</a>}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="/perfil">
-              {perfil?.avatar_url
-                ? <img src={perfil.avatar_url} className="w-8 h-8 rounded-full object-cover" alt="" />
-                : <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-sm">🌸</div>
-              }
-            </a>
-          </div>
+    <div className="min-h-screen" style={{ background: '#f5f0eb' }}>
+      <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+        <img src="/logo.png" alt="Socias Digitales" style={{ height: 36, objectFit: 'contain' }} />
+        <div className="flex items-center gap-4">
+          <a href="/perfil" className="text-sm text-gray-500 hover:text-gray-800">← Mi perfil</a>
+          {esAdmin && <a href="/admin/classroom" className="text-sm text-rose-600 font-medium">Gestionar clases</a>}
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Classroom</h1>
-            <p className="text-gray-500 text-sm mt-1">{modulos.length} módulos disponibles</p>
-          </div>
-          {esAdmin && (
-            <a href="/admin/classroom"
-              className="bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-              + Gestionar módulos
-            </a>
-          )}
+      <div className="max-w-3xl mx-auto px-4 py-10 space-y-8">
+
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-black" style={{ color: '#1a1a1a' }}>Programa Socias Digitales</h1>
+          <p className="text-sm text-gray-500 mt-2">
+            {totalDesbloqueadas} de {total} clases desbloqueadas
+          </p>
         </div>
 
-        {modulos.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-5xl mb-4">📚</p>
-            <p className="text-lg font-medium">Próximamente</p>
-            <p className="text-sm mt-1">Los módulos del curso aparecerán acá</p>
+        {/* Badge de plan */}
+        {!esAdmin && (
+          <div className={`rounded-2xl px-5 py-4 flex items-center justify-between ${planAlumna ? 'bg-white' : 'bg-amber-50 border border-amber-200'}`}>
+            {planAlumna ? (
+              <>
+                <div>
+                  <p className="text-xs text-gray-400 font-medium">Tu plan actual</p>
+                  <p className="text-xl font-black mt-0.5" style={{ color: '#E27396' }}>
+                    Socia ${planAlumna} USD
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-400">{totalDesbloqueadas} clases</p>
+                  <p className="text-xs font-semibold" style={{ color: '#337357' }}>desbloqueadas ✓</p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="text-sm font-bold text-amber-800">No tenés un plan asignado todavía</p>
+                <p className="text-xs text-amber-600 mt-0.5">Contactá a tu administradora para activar tu acceso</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {modulos.map((modulo, i) => {
-              const progreso = calcularProgreso(modulo)
-              const gradiente = COLORES_GRADIENTE[i % COLORES_GRADIENTE.length]
-              const completadas = modulo.lecciones.filter(l => leccionesCompletadas.has(l.id)).length
+        )}
 
-              return (
-                <a key={modulo.id} href={`/classroom/${modulo.id}`}
-                  className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all cursor-pointer">
+        {/* Clases por módulo */}
+        {modulos.map(modulo => {
+          const clasesDelModulo = clases.filter(c => c.modulo === modulo)
+          return (
+            <div key={modulo} className="space-y-3">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">{modulo}</h2>
+              <div className="space-y-2">
+                {clasesDelModulo.map((clase, i) => {
+                  const desbloqueada = tieneAcceso(clase.plan)
+                  return (
+                    <div key={clase.id}
+                      onClick={() => desbloqueada && clase.vimeo_url && setClaseAbierta(clase)}
+                      className={`bg-white rounded-2xl p-4 flex items-center gap-4 transition-all ${desbloqueada ? 'cursor-pointer hover:shadow-md hover:border-rose-200 border border-transparent' : 'opacity-70 cursor-not-allowed border border-transparent'}`}>
 
-                  {/* Thumbnail */}
-                  <div className="relative h-48 overflow-hidden">
-                    {modulo.imagen_url ? (
-                      <img
-                        src={modulo.imagen_url}
-                        alt={modulo.titulo}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${gradiente} flex items-center justify-center`}>
-                        <span className="text-white font-black text-6xl opacity-30">{modulo.orden + 1}</span>
+                      {/* Número / candado */}
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm"
+                        style={{ background: desbloqueada ? '#fce7f3' : '#f3f4f6', color: desbloqueada ? '#E27396' : '#9ca3af' }}>
+                        {desbloqueada ? clase.orden + 1 : '🔒'}
                       </div>
-                    )}
-                    {/* Número del episodio */}
-                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                      Ep {modulo.orden + 1}
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-bold text-sm ${desbloqueada ? 'text-gray-900' : 'text-gray-400'}`}>
+                          {clase.titulo}
+                        </p>
+                        {clase.descripcion && (
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">{clase.descripcion}</p>
+                        )}
+                      </div>
+
+                      {/* Plan requerido si bloqueada */}
+                      {!desbloqueada && (
+                        <span className="text-xs font-bold px-2 py-1 rounded-full flex-shrink-0"
+                          style={{ background: '#fce7f3', color: '#E27396' }}>
+                          Plan $97
+                        </span>
+                      )}
+
+                      {/* Play si desbloqueada */}
+                      {desbloqueada && clase.vimeo_url && (
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ background: '#E27396' }}>
+                          <span className="text-white text-xs">▶</span>
+                        </div>
+                      )}
                     </div>
-                    {/* Badge completado */}
-                    {progreso === 100 && (
-                      <div className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                        ✓ Completado
-                      </div>
-                    )}
-                  </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
 
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 text-base leading-snug mb-1 group-hover:text-rose-600 transition-colors">
-                      {modulo.titulo}
-                    </h3>
-                    {modulo.descripcion && (
-                      <p className="text-gray-500 text-sm line-clamp-2 mb-3">{modulo.descripcion}</p>
-                    )}
+        {/* Upgrade banner si tiene $27 y hay clases de $97 */}
+        {planAlumna === '27' && clases.some(c => c.plan === '97') && (
+          <div className="rounded-3xl p-6 text-center" style={{ background: '#1a1a1a' }}>
+            <p className="text-2xl mb-2">🚀</p>
+            <p className="font-black text-white text-lg">Desbloqueá el curso completo</p>
+            <p className="text-sm text-gray-400 mt-1 mb-4">
+              Con el plan Socia $97 accedés a {clases.filter(c => c.plan === '97').length} clases extra y contenido exclusivo
+            </p>
+            <span className="inline-block text-sm font-bold px-5 py-2.5 rounded-xl"
+              style={{ background: '#E27396', color: 'white' }}>
+              Contactá a tu administradora para hacer el upgrade
+            </span>
+          </div>
+        )}
 
-                    {/* Progreso */}
-                    <div className="space-y-1">
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div
-                          className="bg-rose-500 h-1.5 rounded-full transition-all"
-                          style={{ width: `${progreso}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center text-xs text-gray-400">
-                        <span>{progreso}%</span>
-                        <span>{completadas}/{modulo.lecciones.length} lecciones</span>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              )
-            })}
+        {clases.length === 0 && (
+          <div className="bg-white rounded-3xl p-12 text-center">
+            <p className="text-4xl mb-3">📚</p>
+            <p className="font-bold text-gray-700">Las clases se están preparando</p>
+            <p className="text-sm text-gray-400 mt-1">Muy pronto vas a poder empezar</p>
           </div>
         )}
       </div>
+
+      {/* Modal reproductor */}
+      {claseAbierta && claseAbierta.vimeo_url && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4"
+          onClick={() => setClaseAbierta(null)}>
+          <div className="w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-white font-bold">{claseAbierta.titulo}</p>
+              <button onClick={() => setClaseAbierta(null)} className="text-white/70 hover:text-white text-2xl">✕</button>
+            </div>
+            <div className="relative rounded-2xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                src={vimeoEmbed(claseAbierta.vimeo_url) ?? ''}
+                className="absolute inset-0 w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

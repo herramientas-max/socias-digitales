@@ -10,10 +10,10 @@ export default async function ClassroomAdminPage() {
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
   if (perfil?.rol !== 'admin') redirect('/perfil')
 
-  const { data: modulos } = await supabase
-    .from('modulos')
-    .select('*, lecciones(id, titulo, orden, duracion_min)')
-    .order('orden')
+  const [{ data: clases }, { data: alumnas }] = await Promise.all([
+    supabase.from('clases').select('*').order('orden'),
+    supabase.from('perfiles').select('id, nombre, plan').neq('rol', 'admin').order('nombre'),
+  ])
 
-  return <ClassroomAdmin modulos={modulos ?? []} />
+  return <ClassroomAdmin clases={clases ?? []} alumnas={alumnas ?? []} />
 }

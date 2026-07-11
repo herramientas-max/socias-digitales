@@ -7,28 +7,17 @@ export default async function ClassroomPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: perfil } = await supabase.from('perfiles').select('rol, nombre, avatar_url').eq('id', user.id).single()
-
-  const { data: modulos } = await supabase
-    .from('modulos')
-    .select('*, lecciones(id)')
-    .eq('estado', 'publicado')
-    .order('orden')
-
-  const { data: progresos } = await supabase
-    .from('progreso_lecciones')
-    .select('leccion_id')
-    .eq('alumna_id', user.id)
-    .eq('completada', true)
-
-  const leccionesCompletadas = new Set(progresos?.map(p => p.leccion_id) ?? [])
+  const [{ data: perfil }, { data: clases }] = await Promise.all([
+    supabase.from('perfiles').select('nombre, avatar_url, rol, plan').eq('id', user.id).single(),
+    supabase.from('clases').select('*').eq('activo', true).order('orden'),
+  ])
 
   return (
     <ClassroomCliente
-      modulos={modulos ?? []}
-      leccionesCompletadas={leccionesCompletadas}
-      perfil={perfil}
+      clases={clases ?? []}
+      planAlumna={perfil?.plan ?? null}
       esAdmin={perfil?.rol === 'admin'}
+      perfil={perfil}
     />
   )
 }
