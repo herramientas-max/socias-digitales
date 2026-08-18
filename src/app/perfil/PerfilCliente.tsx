@@ -218,6 +218,14 @@ export default function PerfilCliente({ user, perfil }: Props) {
             <p className="text-xs text-gray-400 mt-1">Muro de resultados</p>
           </a>
 
+          {/* Checklist — activo */}
+          <a href="/checklist"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
+            <div className="text-5xl mb-3">✅</div>
+            <p className="font-bold text-gray-800 text-base">Mi día</p>
+            <p className="text-xs text-gray-400 mt-1">Checklist diaria</p>
+          </a>
+
           {/* Programa — activo */}
           <a href="/classroom"
             className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
