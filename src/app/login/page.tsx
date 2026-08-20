@@ -38,7 +38,7 @@ export default function LoginPage() {
 
       {/* Panel izquierdo — imagen */}
       <div className="hidden lg:block flex-1 relative overflow-hidden">
-        <img src="/banner-login.png" alt="Socias Digitales" className="w-full h-full object-cover" />
+        <img src="/banner-login.jpeg" alt="Socias Digitales" className="w-full h-full object-cover" />
       </div>
 
       {/* Panel derecho — formulario */}
