@@ -8,6 +8,7 @@ interface Tarea {
   texto: string
   completada: boolean
   fecha: string
+  categoria: string
 }
 
 interface Props {
@@ -15,6 +16,13 @@ interface Props {
   userId: string
   fecha: string
 }
+
+const CATEGORIAS = [
+  { id: 'pagos',           label: 'Pagos',            emoji: '💳', color: '#E27396' },
+  { id: 'negocio_digital', label: 'Negocio digital',  emoji: '💻', color: '#7c3aed' },
+  { id: 'habitos',         label: 'Hábitos diarios',  emoji: '🌱', color: '#337357' },
+  { id: 'trabajo',         label: 'Trabajo',           emoji: '💼', color: '#d97706' },
+]
 
 function GraficoCircular({ porcentaje }: { porcentaje: number }) {
   const radio = 54
@@ -65,8 +73,11 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
   const supabase = createClient()
   const [tareas, setTareas] = useState<Tarea[]>(tareasIniciales)
   const [nueva, setNueva] = useState('')
+  const [categoria, setCategoria] = useState('pagos')
+  const [filtro, setFiltro] = useState('todas')
   const [agregando, setAgregando] = useState(false)
 
+  const tareasFiltradas = filtro === 'todas' ? tareas : tareas.filter(t => t.categoria === filtro)
   const completadas = tareas.filter(t => t.completada).length
   const porcentaje = tareas.length === 0 ? 0 : Math.round((completadas / tareas.length) * 100)
 
@@ -84,6 +95,7 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
       texto: nueva.trim(),
       completada: false,
       fecha,
+      categoria,
     }
     setTareas(prev => [...prev, nuevaTarea])
     setNueva('')
@@ -93,6 +105,7 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
       alumna_id: userId,
       texto: nuevaTarea.texto,
       fecha,
+      categoria,
     })
     setAgregando(false)
   }
@@ -134,57 +147,106 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
           <div className="flex-1 space-y-3">
 
             {/* Agregar tarea */}
-            <form onSubmit={agregarTarea} className="flex gap-2">
-              <input
-                type="text"
-                value={nueva}
-                onChange={e => setNueva(e.target.value)}
-                placeholder="Agregar tarea..."
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 shadow-sm"
-                style={{ '--tw-ring-color': '#E27396' } as React.CSSProperties}
-              />
-              <button type="submit" disabled={!nueva.trim() || agregando}
-                className="px-4 py-3 rounded-xl text-white font-bold text-sm disabled:opacity-40 transition-colors flex-shrink-0"
-                style={{ background: '#E27396' }}>
-                + Agregar
-              </button>
+            <form onSubmit={agregarTarea} className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nueva}
+                  onChange={e => setNueva(e.target.value)}
+                  placeholder="Agregar tarea..."
+                  className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': '#E27396' } as React.CSSProperties}
+                />
+                <button type="submit" disabled={!nueva.trim() || agregando}
+                  className="px-4 py-2.5 rounded-xl text-white font-bold text-sm disabled:opacity-40 transition-colors flex-shrink-0"
+                  style={{ background: '#E27396' }}>
+                  + Agregar
+                </button>
+              </div>
+              {/* Selector de categoría */}
+              <div className="flex gap-2 flex-wrap">
+                {CATEGORIAS.map(cat => (
+                  <button key={cat.id} type="button" onClick={() => setCategoria(cat.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all"
+                    style={{
+                      borderColor: categoria === cat.id ? cat.color : '#e5e7eb',
+                      background: categoria === cat.id ? cat.color + '15' : 'white',
+                      color: categoria === cat.id ? cat.color : '#9ca3af',
+                    }}>
+                    {cat.emoji} {cat.label}
+                  </button>
+                ))}
+              </div>
             </form>
 
+            {/* Filtros */}
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={() => setFiltro('todas')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${filtro === 'todas' ? 'text-white' : 'bg-white text-gray-500 border border-gray-200'}`}
+                style={filtro === 'todas' ? { background: '#1a1a1a' } : {}}>
+                Todas ({tareas.length})
+              </button>
+              {CATEGORIAS.map(cat => {
+                const cant = tareas.filter(t => t.categoria === cat.id).length
+                if (cant === 0) return null
+                return (
+                  <button key={cat.id} onClick={() => setFiltro(cat.id)}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all"
+                    style={{
+                      borderColor: filtro === cat.id ? cat.color : '#e5e7eb',
+                      background: filtro === cat.id ? cat.color + '15' : 'white',
+                      color: filtro === cat.id ? cat.color : '#9ca3af',
+                    }}>
+                    {cat.emoji} {cat.label} ({cant})
+                  </button>
+                )
+              })}
+            </div>
+
             {/* Lista */}
-            {tareas.length === 0 ? (
+            {tareasFiltradas.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 text-center shadow-sm">
                 <p className="text-3xl mb-2">📝</p>
-                <p className="text-gray-500 text-sm">No hay tareas todavía.</p>
+                <p className="text-gray-500 text-sm">{filtro === 'todas' ? 'No hay tareas todavía.' : 'No hay tareas en esta categoría.'}</p>
                 <p className="text-gray-400 text-xs mt-1">Agregá la primera arriba</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {tareas.map(tarea => (
-                  <div key={tarea.id}
-                    className={`bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border transition-all ${tarea.completada ? 'border-green-100' : 'border-transparent'}`}>
+                {tareasFiltradas.map(tarea => {
+                  const cat = CATEGORIAS.find(c => c.id === tarea.categoria)
+                  return (
+                    <div key={tarea.id}
+                      className={`bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border transition-all ${tarea.completada ? 'border-green-100 opacity-70' : 'border-transparent'}`}>
 
-                    {/* Checkbox */}
-                    <button onClick={() => toggleTarea(tarea.id)}
-                      className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
-                      style={{
-                        borderColor: tarea.completada ? '#337357' : '#d1d5db',
-                        background: tarea.completada ? '#337357' : 'white'
-                      }}>
-                      {tarea.completada && <span className="text-white text-xs font-bold">✓</span>}
-                    </button>
+                      {/* Checkbox */}
+                      <button onClick={() => toggleTarea(tarea.id)}
+                        className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                        style={{
+                          borderColor: tarea.completada ? '#337357' : '#d1d5db',
+                          background: tarea.completada ? '#337357' : 'white'
+                        }}>
+                        {tarea.completada && <span className="text-white text-xs font-bold">✓</span>}
+                      </button>
 
-                    {/* Texto */}
-                    <span className={`flex-1 text-sm transition-all ${tarea.completada ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-                      {tarea.texto}
-                    </span>
+                      {/* Texto */}
+                      <span className={`flex-1 text-sm transition-all ${tarea.completada ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                        {tarea.texto}
+                      </span>
 
-                    {/* Eliminar */}
-                    <button onClick={() => eliminarTarea(tarea.id)}
-                      className="text-gray-300 hover:text-red-400 transition-colors text-lg flex-shrink-0">
-                      ×
-                    </button>
-                  </div>
-                ))}
+                      {/* Badge categoría */}
+                      {cat && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                          style={{ background: cat.color + '18', color: cat.color }}>
+                          {cat.emoji} {cat.label}
+                        </span>
+                      )}
+
+                      {/* Eliminar */}
+                      <button onClick={() => eliminarTarea(tarea.id)}
+                        className="text-gray-300 hover:text-red-400 transition-colors text-lg flex-shrink-0">×</button>
+                    </div>
+                  )
+                })}
               </div>
             )}
 

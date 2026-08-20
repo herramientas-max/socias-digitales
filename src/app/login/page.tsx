@@ -36,47 +36,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
 
-      {/* Panel izquierdo — marca */}
-      <div className="hidden lg:flex flex-col items-center justify-center flex-1 relative overflow-hidden"
-        style={{ background: '#faf7f4' }}>
-
-        {/* Círculo decorativo SVG */}
-        <div className="relative flex items-center justify-center" style={{ width: 480, height: 480 }}>
-          <svg className="absolute inset-0" width="480" height="480" viewBox="0 0 480 480">
-            <circle cx="240" cy="240" r="195" fill="none" stroke="#E27396" strokeWidth="1" strokeDasharray="6 6" opacity="0.4" />
-          </svg>
-
-            {/* Arriba centro — auriculares + libro */}
-          <div className="absolute" style={{ top: 4, left: '50%', transform: 'translateX(-50%)' }}>
-            <img src="/item1.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-          {/* Arriba derecha — birrete */}
-          <div className="absolute" style={{ top: 60, right: 28 }}>
-            <img src="/item4.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-          {/* Abajo derecha — laptop */}
-          <div className="absolute" style={{ bottom: 60, right: 28 }}>
-            <img src="/item5.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-          {/* Abajo centro — chica meditando */}
-          <div className="absolute" style={{ bottom: 4, left: '50%', transform: 'translateX(-50%)' }}>
-            <img src="/item3.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-          {/* Abajo izquierda — dinero */}
-          <div className="absolute" style={{ bottom: 60, left: 28 }}>
-            <img src="/item2.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-          {/* Arriba izquierda — libros */}
-          <div className="absolute" style={{ top: 60, left: 28 }}>
-            <img src="/item6.png" alt="" style={{width:110,height:110,objectFit:"contain",filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.1))"}} />
-          </div>
-
-          {/* Logo central */}
-          <div className="relative z-10 flex flex-col items-center">
-            <img src="/logo.png" alt="Socias Digitales" style={{width:180,height:180,objectFit:"contain"}} />
-            <p className="text-xs mt-2 tracking-[0.2em] uppercase" style={{ color: '#6D9F71' }}>Tu comunidad digital</p>
-          </div>
-        </div>
+      {/* Panel izquierdo — imagen */}
+      <div className="hidden lg:block flex-1 relative overflow-hidden">
+        <img src="/banner-login.png" alt="Socias Digitales" className="w-full h-full object-cover" />
       </div>
 
       {/* Panel derecho — formulario */}
