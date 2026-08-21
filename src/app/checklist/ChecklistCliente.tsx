@@ -24,10 +24,27 @@ const CATEGORIAS = [
   { id: 'trabajo',         label: 'Trabajo',           emoji: '💼', color: '#d97706' },
 ]
 
-function GraficoCircular({ porcentaje }: { porcentaje: number }) {
+function GraficoCircular({ porcentaje, colorActivo, sinTareas }: { porcentaje: number; colorActivo?: string; sinTareas?: boolean }) {
   const radio = 54
   const circunferencia = 2 * Math.PI * radio
   const progreso = circunferencia - (porcentaje / 100) * circunferencia
+  const color = porcentaje === 100 ? '#337357' : (colorActivo ?? '#E27396')
+
+  if (sinTareas) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="relative" style={{ width: 160, height: 160 }}>
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r={radio} fill="none" stroke="#f3f4f6" strokeWidth="14" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-3xl">💤</span>
+            <span className="text-xs text-gray-400 mt-1">Sin tareas</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -39,7 +56,7 @@ function GraficoCircular({ porcentaje }: { porcentaje: number }) {
           <circle
             cx="80" cy="80" r={radio}
             fill="none"
-            stroke={porcentaje === 100 ? '#337357' : '#E27396'}
+            stroke={color}
             strokeWidth="14"
             strokeLinecap="round"
             strokeDasharray={circunferencia}
@@ -50,7 +67,7 @@ function GraficoCircular({ porcentaje }: { porcentaje: number }) {
         </svg>
         {/* Número central */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-black" style={{ color: porcentaje === 100 ? '#337357' : '#E27396' }}>
+          <span className="text-3xl font-black" style={{ color }}>
             {porcentaje}%
           </span>
           <span className="text-xs text-gray-400 mt-0.5">completado</span>
@@ -80,6 +97,10 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
   const tareasFiltradas = filtro === 'todas' ? tareas : tareas.filter(t => t.categoria === filtro)
   const completadas = tareas.filter(t => t.completada).length
   const porcentaje = tareas.length === 0 ? 0 : Math.round((completadas / tareas.length) * 100)
+
+  const tareasNegocio = tareas.filter(t => t.categoria === 'negocio_digital')
+  const completadasNegocio = tareasNegocio.filter(t => t.completada).length
+  const porcentajeNegocio = tareasNegocio.length === 0 ? 0 : Math.round((completadasNegocio / tareasNegocio.length) * 100)
 
   const fechaFormateada = new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
     weekday: 'long', day: 'numeric', month: 'long'
@@ -258,11 +279,23 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
             )}
           </div>
 
-          {/* Gráfico circular */}
-          <div className="bg-white rounded-3xl shadow-sm p-6 flex flex-col items-center sm:w-48 w-full"
-            style={{ border: '1px solid #f3f4f6' }}>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Progreso del día</p>
-            <GraficoCircular porcentaje={porcentaje} />
+          {/* Gráficos circulares */}
+          <div className="flex flex-col gap-4 sm:w-48 w-full">
+
+            {/* General */}
+            <div className="bg-white rounded-3xl shadow-sm p-6 flex flex-col items-center"
+              style={{ border: '1px solid #f3f4f6' }}>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Mi día en general</p>
+              <GraficoCircular porcentaje={porcentaje} />
+            </div>
+
+            {/* Negocio digital */}
+            <div className="bg-white rounded-3xl shadow-sm p-6 flex flex-col items-center"
+              style={{ border: '1px solid #ede9fe' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: '#7c3aed' }}>💻 Negocio digital</p>
+              <GraficoCircular porcentaje={porcentajeNegocio} colorActivo="#7c3aed" sinTareas={tareasNegocio.length === 0} />
+            </div>
+
           </div>
 
         </div>
