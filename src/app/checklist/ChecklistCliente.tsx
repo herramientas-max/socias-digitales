@@ -95,8 +95,9 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
   const [agregando, setAgregando] = useState(false)
 
   const tareasFiltradas = filtro === 'todas' ? tareas : tareas.filter(t => t.categoria === filtro)
-  const completadas = tareas.filter(t => t.completada).length
-  const porcentaje = tareas.length === 0 ? 0 : Math.round((completadas / tareas.length) * 100)
+  const tareasGenerales = tareas.filter(t => t.categoria !== 'negocio_digital')
+  const completadas = tareasGenerales.filter(t => t.completada).length
+  const porcentaje = tareasGenerales.length === 0 ? 0 : Math.round((completadas / tareasGenerales.length) * 100)
 
   const tareasNegocio = tareas.filter(t => t.categoria === 'negocio_digital')
   const completadasNegocio = tareasNegocio.filter(t => t.completada).length
@@ -274,7 +275,7 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
             {/* Resumen */}
             {tareas.length > 0 && (
               <p className="text-xs text-gray-400 text-center pt-1">
-                {completadas} de {tareas.length} tarea{tareas.length !== 1 ? 's' : ''} completada{completadas !== 1 ? 's' : ''}
+                {completadas} de {tareasGenerales.length} tarea{tareasGenerales.length !== 1 ? 's' : ''} generales · {completadasNegocio} de {tareasNegocio.length} de negocio digital
               </p>
             )}
           </div>
@@ -286,7 +287,7 @@ export default function ChecklistCliente({ tareas: tareasIniciales, userId, fech
             <div className="bg-white rounded-3xl shadow-sm p-6 flex flex-col items-center"
               style={{ border: '1px solid #f3f4f6' }}>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Mi día en general</p>
-              <GraficoCircular porcentaje={porcentaje} />
+              <GraficoCircular porcentaje={porcentaje} sinTareas={tareasGenerales.length === 0} />
             </div>
 
             {/* Negocio digital */}
