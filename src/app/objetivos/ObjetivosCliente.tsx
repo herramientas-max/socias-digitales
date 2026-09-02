@@ -271,28 +271,28 @@ export default function ObjetivosCliente({ userId, objetivoGuardado }: Props) {
 
             {/* Números */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white bg-opacity-15 rounded-xl p-3 text-center">
-                <p className="text-white opacity-70 text-xs mb-1">Ganancia total</p>
-                <p className="text-white font-black text-2xl">${totalGanado.toFixed(0)}</p>
-                <p className="text-white opacity-60 text-xs">USD</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.18)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Ganancia total</p>
+                <p className="font-black text-2xl" style={{ color: '#fff' }}>${totalGanado.toFixed(0)}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>USD</p>
               </div>
-              <div className="bg-white bg-opacity-15 rounded-xl p-3 text-center">
-                <p className="text-white opacity-70 text-xs mb-1">{faltante > 0 ? 'Faltante' : '¡Meta cumplida!'}</p>
-                <p className="text-white font-black text-2xl">{faltante > 0 ? `$${faltante.toFixed(0)}` : '🎉'}</p>
-                {faltante > 0 && <p className="text-white opacity-60 text-xs">USD</p>}
+              <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.18)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>{faltante > 0 ? 'Faltante' : '¡Meta cumplida!'}</p>
+                <p className="font-black text-2xl" style={{ color: '#fff' }}>{faltante > 0 ? `$${faltante.toFixed(0)}` : '🎉'}</p>
+                {faltante > 0 && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>USD</p>}
               </div>
             </div>
 
             {/* Desglose por producto */}
-            <div className="bg-white bg-opacity-15 rounded-xl p-4 space-y-2">
-              <p className="text-white text-xs font-semibold opacity-75 mb-3">Desglose</p>
+            <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.18)' }}>
+              <p className="text-xs font-semibold mb-3" style={{ color: 'rgba(255,255,255,0.75)' }}>Desglose</p>
               {productos.map(p => (
-                <div key={p.id} className="flex justify-between text-white text-sm">
-                  <span className="opacity-75">{p.cantidad}× {p.nombre}</span>
+                <div key={p.id} className="flex justify-between text-sm" style={{ color: '#fff' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.8)' }}>{p.cantidad}× {p.nombre}</span>
                   <span className="font-semibold">${(p.precio * p.comisionPct / 100 * p.cantidad).toFixed(0)} USD</span>
                 </div>
               ))}
-              <div className="border-t border-white border-opacity-20 pt-2 flex justify-between text-white font-black">
+              <div className="pt-2 flex justify-between font-black" style={{ borderTop: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}>
                 <span>Total</span>
                 <span>${totalGanado.toFixed(0)} USD</span>
               </div>
