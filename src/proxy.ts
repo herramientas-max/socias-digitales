@@ -28,7 +28,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Rutas que requieren login
-  const rutasProtegidas = ['/perfil', '/admin', '/metricas', '/classroom', '/productos', '/ranking', '/logros', '/comunidad', '/resultados', '/checklist']
+  const rutasProtegidas = ['/perfil', '/admin', '/metricas', '/classroom', '/productos', '/ranking', '/logros', '/comunidad', '/resultados', '/checklist', '/objetivos']
   if (!user && rutasProtegidas.some(r => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
