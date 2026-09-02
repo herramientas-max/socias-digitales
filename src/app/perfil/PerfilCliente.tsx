@@ -209,10 +209,12 @@ export default function PerfilCliente({ user, perfil }: Props) {
 
           {/* Checklist — activo */}
           <a href="/checklist"
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
-            <div className="text-5xl mb-3">✅</div>
-            <p className="font-bold text-gray-800 text-base">Mi día</p>
-            <p className="text-xs text-gray-400 mt-1">Checklist diaria</p>
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden">
+            <img src="/banner-midia.jpeg" alt="Mi día" style={{ width: '100%', height: 140, objectFit: 'cover' }} className="group-hover:scale-105 transition-transform" />
+            <div className="p-4 pt-3">
+              <p className="font-bold text-gray-800 text-base">Mi día</p>
+              <p className="text-xs text-gray-400 mt-1">Checklist diaria</p>
+            </div>
           </a>
 
           {/* Programa — activo */}
