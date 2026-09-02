@@ -128,7 +128,6 @@ export default function PerfilCliente({ user, perfil }: Props) {
       <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
         <img src="/logo.png" alt="Socias Digitales" style={{ height: 36, objectFit: 'contain' }} />
         <div className="flex items-center gap-4">
-          <a href="/metricas" className="text-sm text-rose-600 hover:text-rose-800 font-medium hidden sm:block">Métricas</a>
           <a href="/productos" className="text-sm text-rose-600 hover:text-rose-800 font-medium hidden sm:block">Productos</a>
           {esAdmin && <a href="/admin" className="text-sm text-rose-600 hover:text-rose-800 font-medium">Panel Admin</a>}
           <button onClick={cerrarSesion} className="text-sm text-gray-500 hover:text-gray-800">Cerrar sesión</button>
@@ -183,16 +182,6 @@ export default function PerfilCliente({ user, perfil }: Props) {
               <p className="text-xs text-gray-400 mt-1">Completá tus datos</p>
             </div>
           </button>
-
-          {/* Métricas */}
-          <a href="/metricas"
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden">
-            <img src="/carpeta-metricas.png" alt="Métricas" style={{ width: '100%', height: 140, objectFit: 'cover' }} className="group-hover:scale-105 transition-transform" />
-            <div className="p-4 pt-3">
-              <p className="font-bold text-gray-800 text-base">Métricas</p>
-              <p className="text-xs text-gray-400 mt-1">Analizá tus resultados</p>
-            </div>
-          </a>
 
           {/* Productos — activo */}
           <a href="/productos"
