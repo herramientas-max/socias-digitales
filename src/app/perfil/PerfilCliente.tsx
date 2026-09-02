@@ -193,10 +193,12 @@ export default function PerfilCliente({ user, perfil }: Props) {
 
           {/* Resultados — activo */}
           <a href="/resultados"
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden flex flex-col items-center justify-center p-6">
-            <div className="text-5xl mb-3">🏆</div>
-            <p className="font-bold text-gray-800 text-base">Mis resultados</p>
-            <p className="text-xs text-gray-400 mt-1">Cargá tus comisiones</p>
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center hover:border-rose-300 hover:shadow-md transition-all group overflow-hidden">
+            <img src="/resultados.jpeg" alt="Mis resultados" style={{ width: '100%', height: 140, objectFit: 'cover', objectPosition: 'center' }} className="group-hover:scale-105 transition-transform" />
+            <div className="p-4 pt-3">
+              <p className="font-bold text-gray-800 text-base">Mis resultados</p>
+              <p className="text-xs text-gray-400 mt-1">Cargá tus comisiones</p>
+            </div>
           </a>
 
           {/* Comunidad — activa */}
