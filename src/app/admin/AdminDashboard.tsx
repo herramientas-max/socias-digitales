@@ -180,6 +180,7 @@ export default function AdminDashboard({ alumnas, stats }: Props) {
             { href: '/admin/productos', emoji: '🛍️', label: 'Productos' },
             { href: '/admin/comunidad', emoji: '💬', label: 'Comunidad y Q&A' },
             { href: '/admin/resultados', emoji: '🏆', label: 'Resultados' },
+            { href: '/admin/notificaciones', emoji: '🔔', label: 'Notificaciones' },
             { href: '/admin/configuracion', emoji: '⚙️', label: 'Configuración' },
           ].map(link => (
             <a key={link.href} href={link.href}
