@@ -20,11 +20,11 @@ interface ObjetivoDB {
 interface Props {
   userId: string
   objetivoGuardado: ObjetivoDB | null
+  esAdmin: boolean
 }
 
-const PRESET: Omit<Programa, 'id'> = { nombre: 'Socias Digitales', precio: 597, comisionPct: 50 }
-
-export default function ObjetivosCliente({ userId, objetivoGuardado }: Props) {
+export default function ObjetivosCliente({ userId, objetivoGuardado, esAdmin }: Props) {
+  const PRESET: Omit<Programa, 'id'> = { nombre: 'Socias Digitales', precio: 597, comisionPct: esAdmin ? 100 : 50 }
   const supabase = createClient()
 
   const [montoObjetivo, setMontoObjetivo] = useState<string>(
