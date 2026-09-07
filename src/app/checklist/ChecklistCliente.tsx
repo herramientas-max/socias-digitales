@@ -22,6 +22,7 @@ const CATEGORIAS = [
   { id: 'negocio_digital', label: 'Negocio digital',  emoji: '💻', color: '#7c3aed' },
   { id: 'habitos',         label: 'Hábitos diarios',  emoji: '🌱', color: '#337357' },
   { id: 'trabajo',         label: 'Trabajo',           emoji: '💼', color: '#d97706' },
+  { id: 'vida_personal',   label: 'Vida personal',    emoji: '🌸', color: '#E27396' },
 ]
 
 function GraficoCircular({ porcentaje, colorActivo, sinTareas }: { porcentaje: number; colorActivo?: string; sinTareas?: boolean }) {
