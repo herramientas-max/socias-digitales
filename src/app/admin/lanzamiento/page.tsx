@@ -80,6 +80,7 @@ export default async function AdminLanzamientoPage() {
                       <td className="px-6 py-4">
                         <p className="font-semibold text-gray-800">{m.perfiles?.nombre || '—'}</p>
                         <p className="text-xs text-gray-400">{m.perfiles?.email || ''}</p>
+                        <p className="text-xs mt-0.5 font-medium" style={{ color: '#337357' }}>Valor $597 · Comisión 50%</p>
                       </td>
                       <td className="text-center px-4 py-4">
                         <span className="text-xs font-semibold px-2 py-1 rounded-full"
