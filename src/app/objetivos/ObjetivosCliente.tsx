@@ -85,6 +85,11 @@ export default function ObjetivosCliente({ userId, objetivoGuardado, esAdmin }: 
         <a href="/perfil" className="text-sm text-gray-500 hover:text-gray-800">← Mi perfil</a>
       </nav>
 
+      {/* Banner */}
+      <div className="w-full overflow-hidden" style={{ height: 315 }}>
+        <img src="/banner.objetivos.png" alt="Mis objetivos" className="w-full h-full object-cover" />
+      </div>
+
       <div className="max-w-xl mx-auto px-4 py-10 space-y-6">
 
         <div>
