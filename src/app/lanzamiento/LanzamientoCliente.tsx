@@ -10,6 +10,7 @@ interface Metricas {
   personas_grupo: number
   personas_seguimiento: number
   ventas_realizadas: number
+  objetivo_septiembre: number
 }
 
 const FECHA_LANZAMIENTO = new Date('2026-09-28T00:00:00')
@@ -105,6 +106,7 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
     personas_grupo: 0,
     personas_seguimiento: 0,
     ventas_realizadas: 0,
+    objetivo_septiembre: 0,
   })
   const [guardandoMetricas, setGuardandoMetricas] = useState(false)
   const [metricasGuardadasOk, setMetricasGuardadasOk] = useState(false)
@@ -326,6 +328,40 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
               </div>
             </div>
           )}
+
+          {/* Objetivo septiembre */}
+          <div className="border-t border-gray-100 pt-5 space-y-3">
+            <div>
+              <p className="font-black text-gray-800">🎯 Objetivo septiembre</p>
+              <p className="text-xs text-gray-400 mt-0.5">¿Cuánto querés ganar este mes? Te decimos cuántas ventas necesitás.</p>
+            </div>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-300 text-xl">$</span>
+              <input
+                type="number" min={0}
+                value={metricas.objetivo_septiembre || ''}
+                onChange={e => setMetricas(m => ({ ...m, objetivo_septiembre: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+                className="w-full border-2 rounded-xl pl-10 pr-16 py-4 text-2xl font-black text-gray-900 focus:outline-none transition-colors"
+                style={{ borderColor: metricas.objetivo_septiembre ? '#E27396' : '#f3f4f6' }}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">USD</span>
+            </div>
+            {metricas.objetivo_septiembre > 0 && (
+              <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, #337357, #4a9970)' }}>
+                <p className="text-white text-sm opacity-80 mb-1">Con comisión de $290 por venta, necesitás:</p>
+                <p className="text-white font-black text-6xl leading-none">
+                  {Math.ceil(metricas.objetivo_septiembre / 290)}
+                </p>
+                <p className="text-white opacity-70 mt-1 text-sm">
+                  {Math.ceil(metricas.objetivo_septiembre / 290) === 1 ? 'venta' : 'ventas'}
+                </p>
+                <p className="text-white opacity-60 text-xs mt-2">
+                  = ${(Math.ceil(metricas.objetivo_septiembre / 290) * 290).toLocaleString('es-AR')} USD garantizados
+                </p>
+              </div>
+            )}
+          </div>
 
           <button onClick={guardarMetricas} disabled={guardandoMetricas}
             className="w-full py-3.5 rounded-2xl text-white font-bold text-sm disabled:opacity-60 transition-all"
