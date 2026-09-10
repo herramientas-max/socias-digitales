@@ -86,7 +86,7 @@ export default function ObjetivosCliente({ userId, objetivoGuardado, esAdmin }: 
       </nav>
 
       {/* Banner */}
-      <div className="w-full overflow-hidden" style={{ height: 315 }}>
+      <div className="w-full overflow-hidden" style={{ height: 315, marginTop: 32 }}>
         <img src="/banner.objetivos.png" alt="Mis objetivos" className="w-full h-full object-cover" />
       </div>
 
