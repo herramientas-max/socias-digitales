@@ -115,7 +115,11 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs mt-8" style={{ color: '#6D9F71' }}>
+          <p className="text-center text-xs mt-6" style={{ color: '#6D9F71' }}>
+            ¿No tenés cuenta?{' '}
+            <a href="/registro" className="font-bold underline">Registrate acá</a>
+          </p>
+          <p className="text-center text-xs mt-2" style={{ color: '#6D9F71' }}>
             ¿Problemas para ingresar? Contactá a tu administradora.
           </p>
         </div>

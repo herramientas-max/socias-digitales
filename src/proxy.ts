@@ -33,9 +33,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Si ya está logueada, redirigir de login a perfil
-  if (user && pathname === '/login') {
-    return NextResponse.redirect(new URL('/perfil', request.url))
+  // Si ya está logueada, redirigir de login/registro según rol
+  if (user && (pathname === '/login' || pathname === '/registro')) {
+    const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).maybeSingle()
+    const destino = perfil?.rol === 'afiliada_lanzamiento' ? '/lanzamiento' : '/perfil'
+    return NextResponse.redirect(new URL(destino, request.url))
+  }
+
+  // Afiliadas de lanzamiento solo pueden ver /lanzamiento
+  if (user && !pathname.startsWith('/lanzamiento') && !pathname.startsWith('/admin') && !pathname.startsWith('/auth')) {
+    const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).maybeSingle()
+    if (perfil?.rol === 'afiliada_lanzamiento') {
+      return NextResponse.redirect(new URL('/lanzamiento', request.url))
+    }
   }
 
   // Si fue invitada y nunca creó su contraseña, forzarla antes de cualquier otra cosa
