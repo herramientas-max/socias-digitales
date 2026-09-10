@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const FECHA_LANZAMIENTO = new Date('2025-09-28T00:00:00')
+const FECHA_LANZAMIENTO = new Date('2026-09-28T00:00:00')
 
 const ETAPAS = [
   {
@@ -193,8 +193,8 @@ export default function LanzamientoCliente({ nombre }: { nombre: string }) {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Fechas clave</p>
               <div className="space-y-2">
                 {[
-                  { fecha: 'Septiembre 2025', evento: 'Preparación y captación', emoji: '📱' },
-                  { fecha: '28 Sep 2025', evento: 'Apertura de carrito 🛒', emoji: '🎯' },
+                  { fecha: 'Septiembre 2026', evento: 'Preparación y captación', emoji: '📱' },
+                  { fecha: '28 Sep 2026', evento: 'Apertura de carrito 🛒', emoji: '🎯' },
                   { fecha: 'Por confirmar', evento: 'Cierre de ventas', emoji: '🔥' },
                 ].map((f, i) => (
                   <div key={i} className="flex items-center gap-3">
