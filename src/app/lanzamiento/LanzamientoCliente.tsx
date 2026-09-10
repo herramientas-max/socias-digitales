@@ -1,6 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+interface Metricas {
+  id?: string
+  tipo_trafico: string
+  inversion: number
+  personas_grupo: number
+  personas_seguimiento: number
+  ventas_realizadas: number
+}
 
 const FECHA_LANZAMIENTO = new Date('2026-09-28T00:00:00')
 
@@ -83,10 +93,34 @@ function usarCountdown() {
   return { dias, horas, minutos }
 }
 
-export default function LanzamientoCliente({ nombre }: { nombre: string }) {
+export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }: { nombre: string, userId: string, metricasGuardadas: Metricas | null }) {
+  const supabase = createClient()
   const [etapaActiva, setEtapaActiva] = useState(0)
   const { dias, horas, minutos } = usarCountdown()
   const etapa = ETAPAS[etapaActiva]
+
+  const [metricas, setMetricas] = useState<Metricas>(metricasGuardadas ?? {
+    tipo_trafico: 'organico',
+    inversion: 0,
+    personas_grupo: 0,
+    personas_seguimiento: 0,
+    ventas_realizadas: 0,
+  })
+  const [guardandoMetricas, setGuardandoMetricas] = useState(false)
+  const [metricasGuardadasOk, setMetricasGuardadasOk] = useState(false)
+
+  async function guardarMetricas() {
+    setGuardandoMetricas(true)
+    const datos = { alumna_id: userId, ...metricas, actualizado_en: new Date().toISOString() }
+    if (metricasGuardadas?.id) {
+      await supabase.from('metricas_lanzamiento').update(datos).eq('id', metricasGuardadas.id)
+    } else {
+      await supabase.from('metricas_lanzamiento').insert(datos)
+    }
+    setGuardandoMetricas(false)
+    setMetricasGuardadasOk(true)
+    setTimeout(() => setMetricasGuardadasOk(false), 3000)
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#f5f0eb' }}>
@@ -209,6 +243,95 @@ export default function LanzamientoCliente({ nombre }: { nombre: string }) {
             </div>
 
           </div>
+        </div>
+
+        {/* Métricas */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 space-y-5">
+          <div>
+            <h2 className="font-black text-gray-800 text-lg">📊 Mis métricas de lanzamiento</h2>
+            <p className="text-sm text-gray-400 mt-0.5">Completá tus números para llevar el seguimiento</p>
+          </div>
+
+          {/* Tipo de tráfico */}
+          <div>
+            <p className="text-sm font-bold text-gray-600 mb-2">Tipo de tráfico</p>
+            <div className="flex gap-2">
+              {['organico', 'pago'].map(tipo => (
+                <button key={tipo} onClick={() => setMetricas(m => ({ ...m, tipo_trafico: tipo }))}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 capitalize transition-all"
+                  style={{
+                    borderColor: metricas.tipo_trafico === tipo ? '#E27396' : '#e5e7eb',
+                    background: metricas.tipo_trafico === tipo ? '#fff0f4' : 'white',
+                    color: metricas.tipo_trafico === tipo ? '#E27396' : '#9ca3af',
+                  }}>
+                  {tipo === 'organico' ? '🌱 Orgánico' : '💰 Pago'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Inversión (solo si es pago) */}
+          {metricas.tipo_trafico === 'pago' && (
+            <div>
+              <p className="text-sm font-bold text-gray-600 mb-2">Inversión en publicidad (USD)</p>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                <input type="number" min={0}
+                  value={metricas.inversion || ''}
+                  onChange={e => setMetricas(m => ({ ...m, inversion: parseFloat(e.target.value) || 0 }))}
+                  placeholder="0"
+                  className="w-full border-2 rounded-xl pl-9 pr-4 py-3 text-gray-900 focus:outline-none"
+                  style={{ borderColor: '#e5e7eb' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Métricas numéricas */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { key: 'personas_grupo', label: 'En el grupo', emoji: '👥' },
+              { key: 'personas_seguimiento', label: 'En seguimiento', emoji: '🎯' },
+              { key: 'ventas_realizadas', label: 'Ventas', emoji: '🏆' },
+            ].map(({ key, label, emoji }) => (
+              <div key={key} className="text-center">
+                <p className="text-xs text-gray-400 mb-1">{emoji} {label}</p>
+                <input
+                  type="number" min={0}
+                  value={(metricas as any)[key] || ''}
+                  onChange={e => setMetricas(m => ({ ...m, [key]: parseInt(e.target.value) || 0 }))}
+                  placeholder="0"
+                  className="w-full border-2 rounded-xl px-3 py-3 text-center text-xl font-black text-gray-800 focus:outline-none transition-colors"
+                  style={{ borderColor: '#e5e7eb' }}
+                  onFocus={e => e.target.style.borderColor = '#E27396'}
+                  onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Resumen visual */}
+          {(metricas.personas_grupo > 0 || metricas.ventas_realizadas > 0) && (
+            <div className="rounded-xl p-4 grid grid-cols-3 gap-3 text-center" style={{ background: '#f5f0eb' }}>
+              <div>
+                <p className="text-2xl font-black" style={{ color: '#337357' }}>{metricas.personas_grupo}</p>
+                <p className="text-xs text-gray-500">en el grupo</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black" style={{ color: '#E27396' }}>{metricas.personas_seguimiento}</p>
+                <p className="text-xs text-gray-500">en seguimiento</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black" style={{ color: '#d97706' }}>{metricas.ventas_realizadas}</p>
+                <p className="text-xs text-gray-500">ventas</p>
+              </div>
+            </div>
+          )}
+
+          <button onClick={guardarMetricas} disabled={guardandoMetricas}
+            className="w-full py-3.5 rounded-2xl text-white font-bold text-sm disabled:opacity-60 transition-all"
+            style={{ background: metricasGuardadasOk ? '#337357' : 'linear-gradient(135deg, #E27396, #337357)' }}>
+            {guardandoMetricas ? 'Guardando...' : metricasGuardadasOk ? '✓ Métricas guardadas' : 'Guardar métricas'}
+          </button>
         </div>
 
       </div>

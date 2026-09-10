@@ -13,5 +13,11 @@ export default async function LanzamientoPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  return <LanzamientoCliente nombre={perfil?.nombre ?? ''} />
+  const { data: metricas } = await supabase
+    .from('metricas_lanzamiento')
+    .select('*')
+    .eq('alumna_id', user.id)
+    .maybeSingle()
+
+  return <LanzamientoCliente nombre={perfil?.nombre ?? ''} userId={user.id} metricasGuardadas={metricas} />
 }
