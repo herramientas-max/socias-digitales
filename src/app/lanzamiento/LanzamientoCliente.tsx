@@ -183,20 +183,64 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">USD</span>
           </div>
-          {metricas.objetivo_septiembre > 0 && (
-            <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, #337357, #4a9970)' }}>
-              <p className="text-white text-sm opacity-80 mb-1">Con comisión de $290 por venta, necesitás:</p>
-              <p className="text-white font-black text-6xl leading-none">
-                {Math.ceil(metricas.objetivo_septiembre / 290)}
-              </p>
-              <p className="text-white opacity-70 mt-1 text-sm">
-                {Math.ceil(metricas.objetivo_septiembre / 290) === 1 ? 'venta' : 'ventas'}
-              </p>
-              <p className="text-white opacity-60 text-xs mt-2">
-                = ${(Math.ceil(metricas.objetivo_septiembre / 290) * 290).toLocaleString('es-AR')} USD garantizados
-              </p>
-            </div>
-          )}
+          {metricas.objetivo_septiembre > 0 && (() => {
+            const ventasNecesarias = Math.ceil(metricas.objetivo_septiembre / 290)
+            const ventasHechas = metricas.ventas_realizadas || 0
+            const pct = Math.min(Math.round((ventasHechas / ventasNecesarias) * 100), 100)
+            const radio = 54
+            const circunferencia = 2 * Math.PI * radio
+            const offset = circunferencia - (pct / 100) * circunferencia
+            const color = pct >= 100 ? '#337357' : '#E27396'
+            return (
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
+
+                {/* Gráfico circular */}
+                <div className="flex-shrink-0 flex flex-col items-center">
+                  <div className="relative" style={{ width: 160, height: 160 }}>
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                      <circle cx="80" cy="80" r={radio} fill="none" stroke="#f3f4f6" strokeWidth="14" />
+                      <circle cx="80" cy="80" r={radio} fill="none"
+                        stroke={color} strokeWidth="14" strokeLinecap="round"
+                        strokeDasharray={circunferencia} strokeDashoffset={offset}
+                        transform="rotate(-90 80 80)"
+                        style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-black" style={{ color }}>{pct}%</span>
+                      <span className="text-xs text-gray-400 mt-0.5">del objetivo</span>
+                    </div>
+                  </div>
+                  {pct >= 100 && <p className="text-sm font-bold mt-1" style={{ color: '#337357' }}>🎉 ¡Meta lograda!</p>}
+                </div>
+
+                {/* Info + input ventas */}
+                <div className="flex-1 space-y-3 w-full">
+                  <div className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #337357, #4a9970)' }}>
+                    <p className="text-white text-xs opacity-80 mb-0.5">Necesitás vender</p>
+                    <p className="text-white font-black text-4xl leading-none">{ventasNecesarias}</p>
+                    <p className="text-white opacity-70 text-xs mt-1">× $290 = ${(ventasNecesarias * 290).toLocaleString('es-AR')} USD</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 mb-1.5">¿Cuántas vendiste hasta ahora?</p>
+                    <input type="number" min={0}
+                      value={metricas.ventas_realizadas || ''}
+                      onChange={e => setMetricas(m => ({ ...m, ventas_realizadas: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                      className="w-full border-2 rounded-xl px-4 py-3 text-2xl font-black text-center text-gray-900 focus:outline-none transition-colors"
+                      style={{ borderColor: ventasHechas > 0 ? color : '#f3f4f6' }}
+                    />
+                    {ventasHechas > 0 && (
+                      <p className="text-xs text-center mt-1.5 font-semibold" style={{ color }}>
+                        ${(ventasHechas * 290).toLocaleString('es-AR')} USD ganados · faltan {Math.max(ventasNecesarias - ventasHechas, 0)} ventas
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            )
+          })()}
         </div>
 
         {/* Timeline de etapas */}
