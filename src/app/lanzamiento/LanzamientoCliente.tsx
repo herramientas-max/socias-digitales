@@ -43,6 +43,7 @@ const ETAPAS = [
     material: [
       { label: 'Material de oferta, avatar y embudo', url: 'https://drive.google.com/drive/folders/1SIoQX_uTgnUNo25OFCHUFkoOJrsRnXrZ?usp=drive_link' },
       { label: 'Clases de lanzamiento', url: '#' },
+      { label: 'Anuncios', url: 'https://drive.google.com/drive/folders/1EeDF0DbScMvz1VdK-wx3Jy3E40Q2ar7M?usp=drive_link' },
     ],
   },
   {
