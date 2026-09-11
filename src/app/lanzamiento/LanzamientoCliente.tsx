@@ -41,7 +41,7 @@ const ETAPAS = [
       'Definir calendario de publicaciones en TikTok',
     ],
     material: [
-      { label: 'Material de oferta', url: '#' },
+      { label: 'Material de oferta, avatar y embudo', url: 'https://drive.google.com/drive/folders/1SIoQX_uTgnUNo25OFCHUFkoOJrsRnXrZ?usp=drive_link' },
       { label: 'Clases de lanzamiento', url: '#' },
     ],
   },
