@@ -27,6 +27,10 @@ const ETAPAS = [
       'Preparar contenido para stories',
       'Diseñar plantillas de publicaciones',
       'Definir calendario de posteos',
+      'Crear grupo de WhatsApp',
+      'Colocar foto de perfil al grupo',
+      'Cerrar el grupo (solo el admin puede hablar)',
+      'Preparar mensaje de bienvenida para 1 a 1',
     ],
     material: [
       { label: 'Material de oferta', url: '#' },
