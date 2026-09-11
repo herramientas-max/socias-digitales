@@ -23,14 +23,22 @@ const ETAPAS = [
     color: '#E27396',
     descripcion: 'Todo lo que tenés que preparar antes de arrancar.',
     tareas: [
-      'Actualizar bio con link de afiliada',
-      'Preparar contenido para stories',
-      'Diseñar plantillas de publicaciones',
-      'Definir calendario de posteos',
       'Crear grupo de WhatsApp',
       'Colocar foto de perfil al grupo',
       'Cerrar el grupo (solo el admin puede hablar)',
       'Preparar mensaje de bienvenida para 1 a 1',
+    ],
+    tareasInstagram: [
+      'Actualizar bio con link de afiliada',
+      'Preparar contenido para stories de Instagram',
+      'Diseñar plantillas de publicaciones para feed',
+      'Definir calendario de posteos en Instagram',
+    ],
+    tareasTiktok: [
+      'Optimizar perfil de TikTok con link de afiliada',
+      'Preparar ideas de videos para el lanzamiento',
+      'Grabar videos de contenido de valor',
+      'Definir calendario de publicaciones en TikTok',
     ],
     material: [
       { label: 'Material de oferta', url: '#' },
@@ -103,6 +111,21 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
   const [etapaActiva, setEtapaActiva] = useState(0)
   const { dias, horas, minutos } = usarCountdown()
   const etapa = ETAPAS[etapaActiva]
+
+  // Red social seleccionada para etapa de preparación
+  const RED_KEY = `lanzamiento-red-${userId}`
+  const [redSocial, setRedSocial] = useState<'instagram' | 'tiktok'>('instagram')
+  useEffect(() => {
+    try {
+      const guardada = localStorage.getItem(RED_KEY) as 'instagram' | 'tiktok' | null
+      if (guardada) setRedSocial(guardada)
+    } catch {}
+  }, [RED_KEY])
+
+  function cambiarRed(red: 'instagram' | 'tiktok') {
+    setRedSocial(red)
+    try { localStorage.setItem(RED_KEY, red) } catch {}
+  }
 
   // Tareas checkeadas — persisten en localStorage por usuaria
   const STORAGE_KEY = `lanzamiento-tareas-${userId}`
@@ -297,32 +320,66 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
               <h2 className="font-black text-gray-800">{etapa.label}</h2>
             </div>
             <p className="text-sm text-gray-500">{etapa.descripcion}</p>
-            <div className="space-y-2 pt-1">
-              {etapa.tareas.map((t, i) => {
-                const key = `${etapa.id}-${i}`
-                const hecho = !!tareasCheck[key]
-                return (
-                  <button key={i} onClick={() => toggleTarea(etapa.id, i)}
-                    className="flex items-start gap-2.5 w-full text-left"
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-                    <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all"
-                      style={{
-                        borderColor: etapa.color,
-                        background: hecho ? etapa.color : 'transparent',
-                      }}>
-                      {hecho && (
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                    <p className="text-sm transition-all" style={{
-                      color: hecho ? '#9ca3af' : '#374151',
-                      textDecoration: hecho ? 'line-through' : 'none',
-                    }}>{t}</p>
+            {/* Selector red social (solo etapa preparacion) */}
+            {etapa.id === 'preparacion' && (
+              <div className="flex gap-2 pt-1">
+                {(['instagram', 'tiktok'] as const).map(red => (
+                  <button key={red} onClick={() => cambiarRed(red)}
+                    className="flex-1 py-2 rounded-xl text-sm font-bold border-2 flex items-center justify-center gap-1.5 transition-all"
+                    style={{
+                      borderColor: redSocial === red ? etapa.color : '#e5e7eb',
+                      background: redSocial === red ? etapa.color + '15' : 'white',
+                      color: redSocial === red ? etapa.color : '#9ca3af',
+                    }}>
+                    {red === 'instagram' ? '📸 Instagram' : '🎵 TikTok'}
                   </button>
-                )
-              })}
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2 pt-1">
+              {(() => {
+                // Para preparacion: tareas base + tareas de la red elegida
+                const listaTareas = etapa.id === 'preparacion'
+                  ? [
+                      ...etapa.tareas,
+                      ...(redSocial === 'instagram'
+                        ? (etapa as any).tareasInstagram
+                        : (etapa as any).tareasTiktok)
+                    ]
+                  : etapa.tareas
+                return listaTareas.map((t: string, i: number) => {
+                  const key = `${etapa.id}-${etapa.id === 'preparacion' ? redSocial + '-' : ''}${i}`
+                  const hecho = !!tareasCheck[key]
+                  return (
+                    <button key={i} onClick={() => {
+                      setTareasCheck(prev => {
+                        const siguiente = { ...prev, [key]: !prev[key] }
+                        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(siguiente)) } catch {}
+                        return siguiente
+                      })
+                    }}
+                      className="flex items-start gap-2.5 w-full text-left"
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                      <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all"
+                        style={{
+                          borderColor: etapa.color,
+                          background: hecho ? etapa.color : 'transparent',
+                        }}>
+                        {hecho && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-sm transition-all" style={{
+                        color: hecho ? '#9ca3af' : '#374151',
+                        textDecoration: hecho ? 'line-through' : 'none',
+                      }}>{t}</p>
+                    </button>
+                  )
+                })
+              })()}
             </div>
           </div>
 
