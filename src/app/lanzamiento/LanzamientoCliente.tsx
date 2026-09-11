@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Metricas {
@@ -99,6 +99,25 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
   const [etapaActiva, setEtapaActiva] = useState(0)
   const { dias, horas, minutos } = usarCountdown()
   const etapa = ETAPAS[etapaActiva]
+
+  // Tareas checkeadas — persisten en localStorage por usuaria
+  const STORAGE_KEY = `lanzamiento-tareas-${userId}`
+  const [tareasCheck, setTareasCheck] = useState<Record<string, boolean>>({})
+  useEffect(() => {
+    try {
+      const guardado = localStorage.getItem(STORAGE_KEY)
+      if (guardado) setTareasCheck(JSON.parse(guardado))
+    } catch {}
+  }, [STORAGE_KEY])
+
+  function toggleTarea(etapaId: string, idx: number) {
+    setTareasCheck(prev => {
+      const key = `${etapaId}-${idx}`
+      const siguiente = { ...prev, [key]: !prev[key] }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(siguiente)) } catch {}
+      return siguiente
+    })
+  }
 
   const [metricas, setMetricas] = useState<Metricas>(metricasGuardadas ?? {
     tipo_trafico: 'organico',
@@ -275,13 +294,31 @@ export default function LanzamientoCliente({ nombre, userId, metricasGuardadas }
             </div>
             <p className="text-sm text-gray-500">{etapa.descripcion}</p>
             <div className="space-y-2 pt-1">
-              {etapa.tareas.map((t, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5"
-                    style={{ borderColor: etapa.color }} />
-                  <p className="text-sm text-gray-700">{t}</p>
-                </div>
-              ))}
+              {etapa.tareas.map((t, i) => {
+                const key = `${etapa.id}-${i}`
+                const hecho = !!tareasCheck[key]
+                return (
+                  <button key={i} onClick={() => toggleTarea(etapa.id, i)}
+                    className="flex items-start gap-2.5 w-full text-left"
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                    <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all"
+                      style={{
+                        borderColor: etapa.color,
+                        background: hecho ? etapa.color : 'transparent',
+                      }}>
+                      {hecho && (
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <p className="text-sm transition-all" style={{
+                      color: hecho ? '#9ca3af' : '#374151',
+                      textDecoration: hecho ? 'line-through' : 'none',
+                    }}>{t}</p>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
