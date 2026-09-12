@@ -37,14 +37,18 @@ function RegistroForm() {
     }
 
     if (data.user) {
-      // Guardar perfil
-      await supabase.from('perfiles').upsert({
-        id: data.user.id,
-        nombre,
-        email,
-        instagram: instagram || null,
-        pais: pais || null,
-        rol: esAfiliada ? 'afiliada_lanzamiento' : 'alumna',
+      // Guardar perfil via API con service role para garantizar el rol correcto
+      await fetch('/api/set-rol', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: data.user.id,
+          nombre,
+          email,
+          instagram: instagram || null,
+          pais: pais || null,
+          rol: esAfiliada ? 'afiliada_lanzamiento' : 'alumna',
+        }),
       })
     }
 
