@@ -31,7 +31,7 @@ function RegistroForm() {
     })
 
     if (signUpError) {
-      setError('No se pudo crear la cuenta. Verificá que el email no esté registrado.')
+      setError(`Error: ${signUpError.message}`)
       setLoading(false)
       return
     }
